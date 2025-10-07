@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1098874852025",
+    "project_id": "bing-daily",
+    "storage_bucket": "bing-daily.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1098874852025:android:85af986aff1842e70e8168",
+        "android_client_info": {
+          "package_name": "com.example.bing_daily"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvPKSl12xT0CWmALgm63Yc3YV_AImTH7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
