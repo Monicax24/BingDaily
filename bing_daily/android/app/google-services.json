@@ -12,7 +12,20 @@
           "package_name": "com.example.bing_daily"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1098874852025-9cm4o3taotgntmu3gcokdkm8mknatulk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bing_daily",
+            "certificate_hash": "badf33929fa69d586f98bb80b9c26eb3f49d5b7b"
+          }
+        },
+        {
+          "client_id": "1098874852025-pm39nsve54gqsmbi3fn46m83kcnauk16.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAvPKSl12xT0CWmALgm63Yc3YV_AImTH7s"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1098874852025-pm39nsve54gqsmbi3fn46m83kcnauk16.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1098874852025-rkudo82gnti4un9764gq1h59uugasiop.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.bingDaily"
+              }
+            }
+          ]
         }
       }
     }

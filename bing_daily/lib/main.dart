@@ -1,4 +1,5 @@
 import 'package:bing_daily/firebase_options.dart';
+import 'package:bing_daily/utils/auth_utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -60,6 +61,13 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                signInWithGoogle();
+              },
+              child: const Text('Login with Google'),
+            )
           ],
         ),
       ),

@@ -63,6 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1098874852025',
     projectId: 'bing-daily',
     storageBucket: 'bing-daily.firebasestorage.app',
+    androidClientId: '1098874852025-9cm4o3taotgntmu3gcokdkm8mknatulk.apps.googleusercontent.com',
+    iosClientId: '1098874852025-rkudo82gnti4un9764gq1h59uugasiop.apps.googleusercontent.com',
     iosBundleId: 'com.example.bingDaily',
   );
+
 }
