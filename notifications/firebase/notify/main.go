@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	push "myfirebaseapp/backend/firebase"
+	push "myfirebaseapp/notifications/firebase"
 )
 
 func main() {
