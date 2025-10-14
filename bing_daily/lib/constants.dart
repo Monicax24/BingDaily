@@ -13,3 +13,7 @@ const String usernameSetupTitle = 'Set Username';
 const String homeLabel = 'Home';
 const String cameraLabel = 'Camera';
 const String accountLabel = 'Account';
+const String cameraButtonText =
+    'Open Camera Roll'; // Button to open camera roll
+const String submitButtonText = 'Submit'; // Submit button for image preview
+const String retakeButtonText = 'Retake'; // Retake button for image preview
