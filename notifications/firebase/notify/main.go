@@ -2,24 +2,39 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"log"
+	"net/http"
 
 	push "myfirebaseapp/notifications/firebase"
 )
 
-func main() {
-	// Replace with a real FCM token when ready
-	token := "DEVICE_TOKEN"
+type NotificationRequest struct {
+	Token string            `json:"token"`
+	Title string            `json:"title"`
+	Body  string            `json:"body"`
+	Data  map[string]string `json:"data,omitempty"`
+}
 
-	id, err := push.SendNotification(context.Background(),
-		"Test Title",
-		"Test Body",
-		token,
-		map[string]string{"foo": "bar"}, // or nil
-	)
-	if err != nil {
-		log.Fatalf("failed to send: %v", err)
+func notifyHandler(w http.ResponseWriter, r *http.Request) {
+	var req NotificationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+		return
 	}
-	fmt.Println("✅ Sent message:", id)
+
+	id, err := push.SendNotification(context.Background(), req.Title, req.Body, req.Token, req.Data)
+	if err != nil {
+		http.Error(w, "Failed to send notification: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("✅ Sent notification with ID: " + id))
+}
+
+func main() {
+	http.HandleFunc("/notify", notifyHandler)
+	log.Println("🚀 Notifications server running on port 8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
