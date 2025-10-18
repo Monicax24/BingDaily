@@ -25,15 +25,44 @@ class LoginScreen extends StatelessWidget {
       appBar: AppBar(title: const Text(appTitle), backgroundColor: bingGreen),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            ElevatedButton(
+            Padding(
+              padding: EdgeInsets.only(
+                top: 200,
+              ),
+            ),
+            Text(
+              "Welcome to BingDaily!",
+              style: TextStyle(
+                fontSize: 35.0,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                top: 100,
+              ),
+            ),
+            ElevatedButton.icon(
               onPressed: () => _handleSignIn(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: bingAccent,
-                foregroundColor: bingWhite,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0.0), // For a perfect rectangle
+                ),
+                backgroundColor: bingWhite,
+                foregroundColor: Colors.black,
               ),
-              child: const Text(loginButtonText),
+              icon: Image.asset(
+                'assets/images/google_icon.jpg',
+                height: 30,
+              ),
+              iconAlignment: IconAlignment.start,
+              label: const Text(
+                loginButtonText,
+                style: TextStyle(
+                  fontFamily: loginButtonFont,
+                )
+              ),
             ),
           ],
         ),

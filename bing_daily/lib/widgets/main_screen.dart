@@ -2,6 +2,7 @@ import 'package:bing_daily/constants.dart';
 import 'package:bing_daily/screens/account_page.dart';
 import 'package:bing_daily/screens/camera_page.dart';
 import 'package:bing_daily/screens/home_page.dart';
+import 'package:bing_daily/screens/unposted_page.dart';
 import 'package:flutter/material.dart';
 
 /// Main screen with bottom navigation bar for Home, Camera, and Account pages.
@@ -16,7 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   // List of pages for navigation
-  static const List<Widget> _pages = [HomePage(), CameraPage(), AccountPage()];
+  static const List<Widget> _pages = [HomePage(), CameraPage(), AccountPage(), UnpostedPage()];
 
   /// Updates the selected page index when a nav item is tapped.
   void _onItemTapped(int index) {
@@ -31,12 +32,11 @@ class _MainScreenState extends State<MainScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: homeLabel),
-          BottomNavigationBarItem(icon: Icon(Icons.camera), label: cameraLabel),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: accountLabel,
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined)),
+          BottomNavigationBarItem(icon: Icon(Icons.search)),
+          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined)),
+          BottomNavigationBarItem(icon: Icon(Icons.camera)),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline_rounded)),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: bingGreen,

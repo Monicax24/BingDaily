@@ -8,7 +8,8 @@ const Color bingAccent = Color(0xFF00A261); // Lighter green accent
 
 // Text constants
 const String appTitle = 'Bing Daily';
-const String loginButtonText = 'Login with Google';
+const String loginButtonText = '  Sign in with Google';
+const String loginButtonFont = 'Arial';
 const String usernameSetupTitle = 'Set Username';
 const String homeLabel = 'Home';
 const String cameraLabel = 'Camera';
