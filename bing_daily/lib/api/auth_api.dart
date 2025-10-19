@@ -12,7 +12,7 @@ Future<User?> signInWithGoogle() async {
       clientId:
           '1098874852025-rkudo82gnti4un9764gq1h59uugasiop.apps.googleusercontent.com',
       serverClientId:
-          '1098874852025-9cm4o3taotgntmu3gcokdkm8mknatulk.apps.googleusercontent.com',
+          '1098874852025-pm39nsve54gqsmbi3fn46m83kcnauk16.apps.googleusercontent.com',
       hostedDomain: 'binghamton.edu',
     );
 

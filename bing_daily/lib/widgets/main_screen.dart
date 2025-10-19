@@ -17,7 +17,13 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   // List of pages for navigation
-  static const List<Widget> _pages = [HomePage(), CameraPage(), AccountPage(), UnpostedPage()];
+  static const List<Widget> _pages = [
+    HomePage(),
+    CameraPage(),
+    AccountPage(),
+    UnpostedPage(),
+    AccountPage(),
+  ];
 
   /// Updates the selected page index when a nav item is tapped.
   void _onItemTapped(int index) {
@@ -32,11 +38,20 @@ class _MainScreenState extends State<MainScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined)),
-          BottomNavigationBarItem(icon: Icon(Icons.search)),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined)),
-          BottomNavigationBarItem(icon: Icon(Icons.camera)),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline_rounded)),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box_outlined),
+            label: 'Post',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Unposted'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline_rounded),
+            label: 'Account',
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: bingGreen,
