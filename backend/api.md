@@ -14,6 +14,7 @@ Authorization: Bearer <token>
 ### Registering an Account
 `/auth/register`
 `authorization required`
+
 For a user to be registered in the backend, they will need to send a registration request. The registration request should be formatted like this:
 
 #### Request
