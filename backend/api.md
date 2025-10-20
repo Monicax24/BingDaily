@@ -12,7 +12,9 @@ Authorization: Bearer <token>
 ```
 
 ### Registering an Account
-In order for a user to be registerd in the backend, they will need to send a registration request. The registration request should be formatted as such:
+`/auth/register`
+`authorization required`
+For a user to be registered in the backend, they will need to send a registration request. The registration request should be formatted like this:
 
 #### Request
 ```
@@ -35,7 +37,10 @@ In order for a user to be registerd in the backend, they will need to send a reg
 ```
 
 
-## Fetch Data
+## Fetch / Update Data
+For all of these requests
+
+### User
 
 
 
