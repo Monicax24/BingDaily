@@ -1,49 +1,51 @@
 # Backend API
-The backend is a REST API that will communicate to the client via JSON post requests. Due to the data transmitted being in JSON format, make sure to add the following header to your HTTP request:
+The backend is a REST API that will communicate to the client. 
+
+For the POST endpoints, make sure to include the following header in your HTTP request:
 ```
 Content-Type: application/json
 ```
+*This is not really necessary, but good practice!*
 
 ## Authentication
-Some API calls will require authentication to be completed. These requests will be marked `authorization required` in this documenation. To include authentication in a request add the following header to your HTTP request:
+Some API calls will require authentication to be completed. These requests will be marked `authorization required` in this documentation. To include authentication, add the following header to your HTTP request:
 ```
 Authorization: Bearer <token>
-
 ```
 
-### Registering an Account
-`/auth/register`
-`authorization required`
+### Register Account
+For a user to be registered in the backend, they first need to register. The registration request should be formatted like this:
 
-For a user to be registered in the backend, they will need to send a registration request. The registration request should be formatted like this:
+`/auth/register` | `POST` | `authorization required`
 
 #### Request
 ```
 {
-    "user-id": string, 
+    "userId": string, 
     "email": string,
     "username": string,
-    "join-date": string*,
+    "joinDate": string*,
     ...
 }
 ```
-\* For the `join-date` field, follow ISO 8601 (YYYY-MM-DD).
+\* The `joinDate` field should follow ISO 8601 (YYYY-MM-DD).
 
 #### Response
 ```
 {
-    "status": "success" or "fail",
-    "error": NULL or string
+    "status": "success" | "fail",
+    "error": NULL | string
 }
 ```
 
 
-## Fetch / Update Data
-For all of these requests
+## User
 
-### User
+### Update User Profile
 
+### Retreive User Profile
 
+## Community
 
-## Upload Data
+## Post
 
