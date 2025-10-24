@@ -196,11 +196,24 @@ func showTableStructure(db *sql.DB, tableName string) error {
 // Register a new user
 func Register(db *sql.DB, name, email, profilePicture string) (int, error) {
 	var userID int
-	err := db.QueryRow(`
-        INSERT INTO users (name, email, profile_picture) 
-        VALUES ($1, $2, $3) 
-        RETURNING id`, // ← FIXED: RETURNING id not user_id
-		name, email, profilePicture).Scan(&userID)
+
+	// Check if user already exists
+	var existingID int
+	err := db.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&existingID)
+	if err == nil {
+		// User already exists, return the existing ID
+		return existingID, nil
+	} else if err != sql.ErrNoRows {
+		// Some other error occurred
+		return 0, err
+	}
+
+	// User doesn't exist, create new one
+	err = db.QueryRow(`
+        INSERT INTO users (name, email, profile_picture, joined_date, communities, friends, created_at) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        RETURNING id`,
+		name, email, profilePicture, time.Now(), "[]", "[]", time.Now()).Scan(&userID)
 	return userID, err
 }
 
@@ -212,7 +225,7 @@ func Login(db *sql.DB, email string) (*User, error) {
 	err := db.QueryRow(`
         SELECT id, name, email, profile_picture, joined_date, communities, friends
         FROM users 
-        WHERE email = $1`, // ← FIXED: email not bing_email
+        WHERE email = $1`,
 		email).Scan(&user.ID, &user.Name, &user.Email, &user.ProfilePicture,
 		&user.JoinedDate, &communitiesJSON, &friendsJSON)
 
@@ -232,7 +245,7 @@ func Follow(db *sql.DB, userID, friendID int) error {
 	_, err := db.Exec(`
 		UPDATE users 
 		SET friends = friends || $1::jsonb
-		WHERE user_id = $2 AND NOT friends @> $3::jsonb`,
+		WHERE id = $2 AND NOT friends @> $3::jsonb`,
 		fmt.Sprintf("[%d]", friendID), userID, fmt.Sprintf("[%d]", friendID))
 	return err
 }
@@ -242,14 +255,14 @@ func Unfollow(db *sql.DB, userID, friendID int) error {
 	_, err := db.Exec(`
 		UPDATE users 
 		SET friends = friends - $1
-		WHERE user_id = $2`,
+		WHERE id = $2`,
 		friendID, userID)
 	return err
 }
 
 // Change profile picture
 func ChangeProfile(db *sql.DB, userID int, profilePicture string) error {
-	_, err := db.Exec("UPDATE users SET profile_picture = $1 WHERE user_id = $2", profilePicture, userID)
+	_, err := db.Exec("UPDATE users SET profile_picture = $1 WHERE id = $2", profilePicture, userID)
 	return err
 }
 
@@ -286,7 +299,7 @@ func DeleteAccount(db *sql.DB, userID int) error {
 	}
 
 	// Delete the user
-	_, err = tx.Exec("DELETE FROM users WHERE user_id = $1", userID)
+	_, err = tx.Exec("DELETE FROM users WHERE id = $1", userID)
 	if err != nil {
 		return err
 	}
@@ -300,10 +313,10 @@ func DeleteAccount(db *sql.DB, userID int) error {
 func CreateCommunity(db *sql.DB, picture, description, postTime, defaultPrompt string) (int, error) {
 	var communityID int
 	err := db.QueryRow(`
-		INSERT INTO communities (picture, description, post_time, default_prompt) 
-		VALUES ($1, $2, $3, $4) 
+		INSERT INTO communities (picture, description, members, moderators, posts, post_time, default_prompt) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
 		RETURNING community_id`,
-		picture, description, postTime, defaultPrompt).Scan(&communityID)
+		picture, description, "[]", "[]", "[]", postTime, defaultPrompt).Scan(&communityID)
 	return communityID, err
 }
 
@@ -366,11 +379,22 @@ func AddModerator(db *sql.DB, communityID, userID int) error {
 // Create a new post
 func CreatePost(db *sql.DB, communityID int, picture, caption string, author int) (int, error) {
 	var postID int
-	err := db.QueryRow(`
-		INSERT INTO posts (community_id, picture, caption, author) 
-		VALUES ($1, $2, $3, $4) 
+
+	// First verify the author exists
+	var userExists bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)", author).Scan(&userExists)
+	if err != nil {
+		return 0, err
+	}
+	if !userExists {
+		return 0, fmt.Errorf("author with ID %d does not exist", author)
+	}
+
+	err = db.QueryRow(`
+		INSERT INTO posts (community_id, picture, caption, author, time_posted, likes) 
+		VALUES ($1, $2, $3, $4, $5, $6) 
 		RETURNING post_id`,
-		communityID, picture, caption, author).Scan(&postID)
+		communityID, picture, caption, author, time.Now(), "[]").Scan(&postID)
 
 	if err == nil {
 		// Add post to community's posts array
@@ -449,15 +473,15 @@ func demoOperations(db *sql.DB) {
 		fmt.Printf("✅ Created community with ID: %d\n", communityID)
 	}
 
-	// Register test users
-	user1, err := Register(db, "Alice", "alice@bing.com", "alice.jpg")
+	// Register test users with unique emails
+	user1, err := Register(db, "Alice", fmt.Sprintf("alice%d@bing.com", time.Now().Unix()), "alice.jpg")
 	if err != nil {
 		log.Printf("User registration failed: %v", err)
 	} else {
 		fmt.Printf("✅ Registered user Alice with ID: %d\n", user1)
 	}
 
-	user2, err := Register(db, "Bob", "bob@bing.com", "bob.jpg")
+	user2, err := Register(db, "Bob", fmt.Sprintf("bob%d@bing.com", time.Now().Unix()+1), "bob.jpg")
 	if err != nil {
 		log.Printf("User registration failed: %v", err)
 	} else {
