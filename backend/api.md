@@ -153,7 +153,7 @@ This endpoint is to retrieve all the posts from a community. This request will o
     "status": "success" | "fail",
     "message": NULL | string,
 
-    "data": PostObject*
+    "data": PostObject[]*
 }
 ```
 
