@@ -1,4 +1,6 @@
-package firebasepush
+package firebase
+
+//figure who to send notification on
 
 import (
 	"context"
