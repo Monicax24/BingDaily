@@ -12,8 +12,11 @@ Some API calls will require authentication to be completed. These requests will 
 Authorization: Bearer <token>
 ```
 
-### Register Account
-`/auth/register` | `POST` | `authorization required`
+
+## User
+
+### Register User
+`/user/register` | `POST` | `authorization required`
 
 For a user to be registered in the backend, they first need to register. The registration request should be formatted like this:
 
@@ -36,9 +39,6 @@ For a user to be registered in the backend, they first need to register. The reg
     "message": NULL | string
 }
 ```
-
-
-## User
 
 ### Update User Profile
 `/user/profile/update` | `POST` | `authorization required`
@@ -66,14 +66,7 @@ To update a user's profile, a request should be sent like this:
 
 ### Retrieve User Profile Data
 
-`/user/profile` | `GET` | `authorization required`
-
-#### Request
-```
-{
-    "userId": string
-}
-```
+`/user/<userId>` | `GET` | `authorization required`
 
 #### Response
 ```
@@ -104,14 +97,7 @@ To update a user's profile, a request should be sent like this:
 
 ### Retrieve Core Community Data
 
-`/community` | `POST` | `authorization required`
-
-#### Request
-```
-{
-    "communityId": string
-}
-```
+`/community/<communityId>` | `GET` | `authorization required`
 
 #### Response
 ```
@@ -136,16 +122,9 @@ To update a user's profile, a request should be sent like this:
 ```
 
 ### Get Community Posts
-`/community/posts` | `POST` | `authorization required`
+`/community/posts/<communityId>` | `GET` | `authorization required`
 
 This endpoint is to retrieve all the posts from a community. This request will only be fulfilled if the user requesting the data has already posted within that community.
-
-#### Request
-```
-{
-    "communityId": string
-}
-```
 
 #### Response
 ```
