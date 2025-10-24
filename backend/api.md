@@ -41,7 +41,7 @@ For a user to be registered in the backend, they first need to register. The reg
 ```
 
 ### Update User Profile
-`/user/profile/update` | `POST` | `authorization required`
+`/user/update` | `POST` | `authorization required`
 
 To update a user's profile, a request should be sent like this:
 
