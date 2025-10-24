@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"bingdaily/api/internal/handler"
 
 	"github.com/gin-gonic/gin"
-
-
-	"bingdaily/api/handler"
 )
 
-func main(){
+func main() {
 	router := gin.Default()
-
-
-	fmt.Println("Hello World!\n");
+	handler.RegisterRoutes(router)
+	router.Run()
 }
