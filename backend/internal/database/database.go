@@ -9,45 +9,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
+
+	"bingdaily/backend/internal/data"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
-
-// User struct represents a user in the system
-type User struct {
-	ID             string    `json:"id"`
-	Name           string    `json:"name"`
-	Email          string    `json:"email"`
-	ProfilePicture string    `json:"profile_picture"`
-	JoinedDate     time.Time `json:"joined_date"`
-	Communities    []int     `json:"communities"` // Array of community IDs
-	Friends        []int     `json:"friends"`     // Array of user IDs
-}
-
-// Post struct represents a daily post
-type Post struct {
-	PostID      int       `json:"post_id"`
-	CommunityID int       `json:"community_id"`
-	Picture     string    `json:"picture"`
-	Caption     string    `json:"caption"`
-	Author      int       `json:"author"` // User ID
-	TimePosted  time.Time `json:"time_posted"`
-	Likes       []int     `json:"likes"` // Array of user IDs who liked the post
-}
-
-// Community struct represents a community
-type Community struct {
-	CommunityID   int    `json:"community_id"`
-	Picture       string `json:"picture"`
-	Description   string `json:"description"`
-	Members       []int  `json:"members"`    // Array of user IDs
-	Moderators    []int  `json:"moderators"` // Array of user IDs
-	Posts         []int  `json:"posts"`      // Array of post IDs
-	PostTime      string `json:"post_time"`  // Default time for daily posts (e.g., "09:00:00")
-	DefaultPrompt string `json:"default_prompt"`
-}
 
 // ==================== DATABASE VERIFICATION ====================
 
@@ -159,8 +126,8 @@ func Register(db *sql.DB, name, email, profilePicture string) (int, error) {
 }
 
 // Login user by email
-func Login(db *sql.DB, email string) (*User, error) {
-	var user User
+func Login(db *sql.DB, email string) (*data.User, error) {
+	var user data.User
 	var communitiesJSON, friendsJSON string
 
 	err := db.QueryRow(`
@@ -262,8 +229,8 @@ func CreateCommunity(db *sql.DB, picture, description, postTime, defaultPrompt s
 }
 
 // Get community by ID
-func GetCommunity(db *sql.DB, communityID int) (*Community, error) {
-	var community Community
+func GetCommunity(db *sql.DB, communityID int) (*data.Community, error) {
+	var community data.Community
 	var membersJSON, moderatorsJSON, postsJSON string
 
 	err := db.QueryRow(`
@@ -350,8 +317,8 @@ func CreatePost(db *sql.DB, communityID int, picture, caption string, author int
 }
 
 // Get post by ID
-func GetPost(db *sql.DB, postID int) (*Post, error) {
-	var post Post
+func GetPost(db *sql.DB, postID int) (*data.Post, error) {
+	var post data.Post
 	var likesJSON string
 
 	err := db.QueryRow(`
@@ -399,74 +366,4 @@ func HasPostedToday(db *sql.DB, userID, communityID int) (bool, error) {
 		WHERE author = $1 AND community_id = $2 AND DATE(time_posted) = CURRENT_DATE`,
 		userID, communityID).Scan(&count)
 	return count > 0, err
-}
-
-// ==================== DEMO OPERATIONS ====================
-
-func demoOperations(db *sql.DB) {
-	fmt.Println("\n🚀 Demo Operations:")
-
-	// Create a test community
-	communityID, err := CreateCommunity(db, "community1.jpg", "Daily photo sharing community", "09:00:00", "Share your daily photo!")
-	if err != nil {
-		log.Printf("Community creation failed: %v", err)
-	} else {
-		fmt.Printf("✅ Created community with ID: %d\n", communityID)
-	}
-
-	// Register test users with unique emails
-	user1, err := Register(db, "Alice", fmt.Sprintf("alice%d@bing.com", time.Now().Unix()), "alice.jpg")
-	if err != nil {
-		log.Printf("User registration failed: %v", err)
-	} else {
-		fmt.Printf("✅ Registered user Alice with ID: %d\n", user1)
-	}
-
-	user2, err := Register(db, "Bob", fmt.Sprintf("bob%d@bing.com", time.Now().Unix()+1), "bob.jpg")
-	if err != nil {
-		log.Printf("User registration failed: %v", err)
-	} else {
-		fmt.Printf("✅ Registered user Bob with ID: %d\n", user2)
-	}
-
-	// Users join community
-	err = JoinCommunity(db, user1, communityID)
-	if err != nil {
-		log.Printf("Join community failed: %v", err)
-	} else {
-		fmt.Printf("✅ User %d joined community %d\n", user1, communityID)
-	}
-
-	err = JoinCommunity(db, user2, communityID)
-	if err != nil {
-		log.Printf("Join community failed: %v", err)
-	} else {
-		fmt.Printf("✅ User %d joined community %d\n", user2, communityID)
-	}
-
-	// Create a post
-	postID, err := CreatePost(db, communityID, "sunset.jpg", "Beautiful sunset today!", user1)
-	if err != nil {
-		log.Printf("Post creation failed: %v", err)
-	} else {
-		fmt.Printf("✅ Created post with ID: %d\n", postID)
-	}
-
-	// Like the post
-	err = LikePost(db, postID, user2)
-	if err != nil {
-		log.Printf("Like post failed: %v", err)
-	} else {
-		fmt.Printf("✅ User %d liked post %d\n", user2, postID)
-	}
-
-	// Check if user has posted today
-	hasPosted, err := HasPostedToday(db, user1, communityID)
-	if err != nil {
-		log.Printf("Check post failed: %v", err)
-	} else {
-		fmt.Printf("✅ User %d has posted today: %t\n", user1, hasPosted)
-	}
-
-	fmt.Println("\n🎉 Demo completed successfully!")
 }

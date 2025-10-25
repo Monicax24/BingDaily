@@ -6,5 +6,7 @@ import (
 
 // Register all the different routes
 func RegisterRoutes(router *gin.Engine) {
-	router.GET("/user/register", registerUser)
+	UserRoutes(router)
+	CommunityRoutes(router)
+	PostRoutes(router)
 }
