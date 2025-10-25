@@ -1,16 +1,15 @@
-//Connecting only worked when I put this in terminal:
-//$env:PG_DSN = "postgresql://SQLDatabase:BinghamtonACMPT4@database-1.c5qccgo64zmj.us-east-2.rds.amazonaws.com:5432/postgres?sslmode=require"
-//Also only worked when I added a rule to allow any IP to connect to the AWS.
-
+// Connecting only worked when I put this in terminal:
+// $env:PG_DSN = "postgresql://SQLDatabase:BinghamtonACMPT4@database-1.c5qccgo64zmj.us-east-2.rds.amazonaws.com:5432/postgres?sslmode=require"
+// Also only worked when I added a rule to allow any IP to connect to the AWS.
 // This is mostly AI and I am still struggling to understand the majority of this, but it works.
-package main
+
+package database
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -18,7 +17,7 @@ import (
 
 // User struct represents a user in the system
 type User struct {
-	ID             int       `json:"id"`
+	ID             string    `json:"id"`
 	Name           string    `json:"name"`
 	Email          string    `json:"email"`
 	ProfilePicture string    `json:"profile_picture"`
@@ -50,67 +49,9 @@ type Community struct {
 	DefaultPrompt string `json:"default_prompt"`
 }
 
-func main() {
-	// Debug info
-	fmt.Println("=== DEBUG INFO ===")
-	fmt.Println("PG_DSN:", os.Getenv("PG_DSN"))
-	fmt.Println("DATABASE_URL:", os.Getenv("DATABASE_URL"))
-	wd, _ := os.Getwd()
-	fmt.Println("Working directory:", wd)
-	fmt.Println("==================")
-
-	// Connect to database
-	dsn := os.Getenv("PG_DSN")
-	if dsn == "" {
-		log.Fatal("PG_DSN environment variable is not set")
-	}
-
-	fmt.Println("Connecting with DSN:", dsn)
-
-	db, err := sql.Open("pgx", dsn)
-	if err != nil {
-		log.Fatal("Unable to connect to database:", err)
-	}
-	defer db.Close()
-
-	// Test connection
-	if err := db.Ping(); err != nil {
-		log.Fatal("Failed to ping database:", err)
-	}
-	fmt.Println("✅ Connected to database!")
-
-	// Verify the required tables exist
-	fmt.Println("\n🔍 Checking database structure...")
-	if err := verifyDatabaseStructure(db); err != nil {
-		log.Fatal("❌ Database structure issue:", err)
-	}
-
-	// Show current tables
-	if err := listAllTables(db); err != nil {
-		log.Fatal("Failed to list tables:", err)
-	}
-
-	// Show table structures
-	if err := showTableStructure(db, "communities"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-	if err := showTableStructure(db, "posts"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-	if err := showTableStructure(db, "users"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-
-	// Your application logic starts here
-	fmt.Println("\n🎉 Database is ready! Starting application...")
-
-	// Demo some operations
-	demoOperations(db)
-}
-
 // ==================== DATABASE VERIFICATION ====================
 
-func verifyDatabaseStructure(db *sql.DB) error {
+func VerifyDatabaseStructure(db *sql.DB) error {
 	requiredTables := []string{"communities", "posts", "users"}
 
 	for _, table := range requiredTables {
@@ -135,7 +76,7 @@ func verifyDatabaseStructure(db *sql.DB) error {
 	return nil
 }
 
-func listAllTables(db *sql.DB) error {
+func ListAllTables(db *sql.DB) error {
 	fmt.Println("\n📊 Listing all tables in the database:")
 	rows, err := db.Query(`
 		SELECT table_name 
@@ -166,7 +107,7 @@ func listAllTables(db *sql.DB) error {
 	return nil
 }
 
-func showTableStructure(db *sql.DB, tableName string) error {
+func ShowTableStructure(db *sql.DB, tableName string) error {
 	fmt.Printf("\n📋 Structure of '%s' table:\n", tableName)
 	columns, err := db.Query(`
 		SELECT column_name, data_type, is_nullable
