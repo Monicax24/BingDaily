@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bingdaily/api/internal/database"
+	"bingdaily/backend/internal/database"
 	"database/sql"
 	"fmt"
 	"log"

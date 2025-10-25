@@ -1,4 +1,4 @@
-module bingdaily/api
+module bingdaily/backend
 
 go 1.25.3
 

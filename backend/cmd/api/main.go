@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bingdaily/api/internal/handler"
+	"bingdaily/backend/internal/handler"
 
 	"github.com/gin-gonic/gin"
 )
