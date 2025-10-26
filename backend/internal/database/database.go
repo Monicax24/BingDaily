@@ -58,7 +58,7 @@ func VerifyDatabaseStructure(db *sql.DB) error {
 		err := db.QueryRow(`
 			SELECT EXISTS (
 				SELECT FROM information_schema.tables 
-				WHERE table_schema = 'public' 
+				WHERE table_schema = 'public' s
 				AND table_name = $1
 			)`, table).Scan(&exists)
 

@@ -1,1 +1,4 @@
 .envrc
+.env
+.venv
+key.json
