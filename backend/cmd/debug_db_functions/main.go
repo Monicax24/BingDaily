@@ -2,6 +2,9 @@ package main
 
 import (
 	"bingdaily/backend/internal/database"
+	"bingdaily/backend/internal/database/communities"
+	"bingdaily/backend/internal/database/posts"
+	"bingdaily/backend/internal/database/users"
 	"database/sql"
 	"fmt"
 	"log"
@@ -13,7 +16,7 @@ func demoOperations(db *sql.DB) {
 	fmt.Println("\n🚀 Demo Operations:")
 
 	// Create a test community
-	communityID, err := database.CreateCommunity(db, "community1.jpg", "Daily photo sharing community", "09:00:00", "Share your daily photo!")
+	communityID, err := communities.CreateCommunity(db, "community1.jpg", "Daily photo sharing community", "09:00:00", "Share your daily photo!")
 	if err != nil {
 		log.Printf("Community creation failed: %v", err)
 	} else {
@@ -21,14 +24,14 @@ func demoOperations(db *sql.DB) {
 	}
 
 	// Register test users with unique emails
-	user1, err := database.Register(db, "Alice", fmt.Sprintf("alice%d@bing.com", time.Now().Unix()), "alice.jpg")
+	user1, err := users.Register(db, "Alice", fmt.Sprintf("alice%d@bing.com", time.Now().Unix()), "alice.jpg")
 	if err != nil {
 		log.Printf("User registration failed: %v", err)
 	} else {
 		fmt.Printf("✅ Registered user Alice with ID: %d\n", user1)
 	}
 
-	user2, err := database.Register(db, "Bob", fmt.Sprintf("bob%d@bing.com", time.Now().Unix()+1), "bob.jpg")
+	user2, err := users.Register(db, "Bob", fmt.Sprintf("bob%d@bing.com", time.Now().Unix()+1), "bob.jpg")
 	if err != nil {
 		log.Printf("User registration failed: %v", err)
 	} else {
@@ -36,14 +39,14 @@ func demoOperations(db *sql.DB) {
 	}
 
 	// Users join community
-	err = database.JoinCommunity(db, user1, communityID)
+	err = communities.JoinCommunity(db, user1, communityID)
 	if err != nil {
 		log.Printf("Join community failed: %v", err)
 	} else {
 		fmt.Printf("✅ User %d joined community %d\n", user1, communityID)
 	}
 
-	err = database.JoinCommunity(db, user2, communityID)
+	err = communities.JoinCommunity(db, user2, communityID)
 	if err != nil {
 		log.Printf("Join community failed: %v", err)
 	} else {
@@ -51,7 +54,7 @@ func demoOperations(db *sql.DB) {
 	}
 
 	// Create a post
-	postID, err := database.CreatePost(db, communityID, "sunset.jpg", "Beautiful sunset today!", user1)
+	postID, err := posts.CreatePost(db, communityID, "sunset.jpg", "Beautiful sunset today!", user1)
 	if err != nil {
 		log.Printf("Post creation failed: %v", err)
 	} else {
@@ -59,7 +62,7 @@ func demoOperations(db *sql.DB) {
 	}
 
 	// Like the post
-	err = database.LikePost(db, postID, user2)
+	err = posts.LikePost(db, postID, user2)
 	if err != nil {
 		log.Printf("Like post failed: %v", err)
 	} else {
@@ -67,7 +70,7 @@ func demoOperations(db *sql.DB) {
 	}
 
 	// Check if user has posted today
-	hasPosted, err := database.HasPostedToday(db, user1, communityID)
+	hasPosted, err := posts.HasPostedToday(db, user1, communityID)
 	if err != nil {
 		log.Printf("Check post failed: %v", err)
 	} else {
