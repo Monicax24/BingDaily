@@ -36,7 +36,7 @@ For a user to be registered in the backend, they first need to register. The reg
 ```
 {
     "status": "success" | "fail",
-    "message": NULL | string
+    "message": string
 }
 ```
 
@@ -60,7 +60,7 @@ To update a user's profile, a request should be sent like this:
 ```
 {
     "status": "success" | "fail",
-    "message": NULL | string
+    "message": string
 }
 ```
 
@@ -72,7 +72,7 @@ To update a user's profile, a request should be sent like this:
 ```
 {
     "status": "success" | "fail",
-    "message": NULL | string,
+    "message": string,
 
     "data": UserObject*
 }
@@ -103,7 +103,7 @@ To update a user's profile, a request should be sent like this:
 ```
 {
     "status": "success" | "fail",
-    "message": NULL | string,
+    "message": string,
 
     "data": CommunityObject*
 }
@@ -130,7 +130,7 @@ This endpoint is to retrieve all the posts from a community. This request will o
 ```
 {
     "status": "success" | "fail",
-    "message": NULL | string,
+    "message": string,
 
     "data": PostObject[]*
 }
@@ -169,7 +169,7 @@ Can only upload 1 post per prompt, so the database will check to see if the post
 ```
 {
     "status": "success" | "fail",
-    "message": NULL | string
+    "message": string
 }
 ```
 

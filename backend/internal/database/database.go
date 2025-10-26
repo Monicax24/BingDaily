@@ -11,10 +11,42 @@ import (
 	"fmt"
 	"time"
 
-	"bingdaily/backend/internal/data"
-
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
+
+// ================ DATABASE STRUCTS ===========================
+type User struct {
+	ID             string    `json:"id"`
+	Name           string    `json:"name"`
+	Email          string    `json:"email"`
+	ProfilePicture string    `json:"profile_picture"`
+	JoinedDate     time.Time `json:"joined_date"`
+	Communities    []int     `json:"communities"` // Array of community IDs
+	Friends        []int     `json:"friends"`     // Array of user IDs
+}
+
+// Post struct represents a daily post
+type Post struct {
+	PostID      int       `json:"post_id"`
+	CommunityID int       `json:"community_id"`
+	Picture     string    `json:"picture"`
+	Caption     string    `json:"caption"`
+	Author      int       `json:"author"` // User ID
+	TimePosted  time.Time `json:"time_posted"`
+	Likes       []int     `json:"likes"` // Array of user IDs who liked the post
+}
+
+// Community struct represents a community
+type Community struct {
+	CommunityID   int    `json:"community_id"`
+	Picture       string `json:"picture"`
+	Description   string `json:"description"`
+	Members       []int  `json:"members"`    // Array of user IDs
+	Moderators    []int  `json:"moderators"` // Array of user IDs
+	Posts         []int  `json:"posts"`      // Array of post IDs
+	PostTime      string `json:"post_time"`  // Default time for daily posts (e.g., "09:00:00")
+	DefaultPrompt string `json:"default_prompt"`
+}
 
 // ==================== DATABASE VERIFICATION ====================
 
@@ -126,8 +158,8 @@ func Register(db *sql.DB, name, email, profilePicture string) (int, error) {
 }
 
 // Login user by email
-func Login(db *sql.DB, email string) (*data.User, error) {
-	var user data.User
+func Login(db *sql.DB, email string) (*User, error) {
+	var user User
 	var communitiesJSON, friendsJSON string
 
 	err := db.QueryRow(`
@@ -229,8 +261,8 @@ func CreateCommunity(db *sql.DB, picture, description, postTime, defaultPrompt s
 }
 
 // Get community by ID
-func GetCommunity(db *sql.DB, communityID int) (*data.Community, error) {
-	var community data.Community
+func GetCommunity(db *sql.DB, communityID int) (*Community, error) {
+	var community Community
 	var membersJSON, moderatorsJSON, postsJSON string
 
 	err := db.QueryRow(`
@@ -317,8 +349,8 @@ func CreatePost(db *sql.DB, communityID int, picture, caption string, author int
 }
 
 // Get post by ID
-func GetPost(db *sql.DB, postID int) (*data.Post, error) {
-	var post data.Post
+func GetPost(db *sql.DB, postID int) (*Post, error) {
+	var post Post
 	var likesJSON string
 
 	err := db.QueryRow(`
