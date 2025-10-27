@@ -1,15 +1,16 @@
-import 'package:bing_daily/api/auth_api.dart';
+import 'package:bing_daily/api/firebase_auth.dart';
 import 'package:bing_daily/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// Login screen with Google Sign-In button for user authentication.
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   /// Triggers Google Sign-In and navigates to username setup on success.
-  void _handleSignIn(BuildContext context) async {
-    final result = await signInWithGoogle();
+  void _handleSignIn(BuildContext context, WidgetRef ref) async {
+    final result = await signInWithGoogle(ref);
     if (result != null) {
       context.go('/username');
     } else {
@@ -20,7 +21,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text(appTitle), backgroundColor: bingGreen),
       body: Center(
@@ -44,7 +45,7 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () => _handleSignIn(context),
+              onPressed: () => _handleSignIn(context, ref),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(0.0), // For a perfect rectangle
