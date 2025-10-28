@@ -1,14 +1,17 @@
+// Handles Firebase Authentication operations for the Bing Daily app.
+import 'dart:convert';
+
 import 'package:bing_daily/models/app_user.dart';
-import 'package:bing_daily/providers/auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
-/// Handles Google Sign-In flow with Firebase Auth (v7+ compatible).
-/// Returns the signed-in [User] or null if sign-in fails or domain is invalid.
-final String _baseUrl = 'http://18.234.86.119:8080';
-Future<User?> signInWithGoogle(WidgetRef ref) async {
+// Base URL for backend API
+const String _baseUrl = 'http://18.234.86.119:8080';
+
+// Handles Google Sign-In flow with Firebase Auth (v7+ compatible).
+// Returns the signed-in [User] or null if sign-in fails or domain is invalid.
+Future<User?> signInWithGoogle() async {
   try {
     final GoogleSignIn googleSignIn = GoogleSignIn.instance;
 
@@ -46,8 +49,6 @@ Future<User?> signInWithGoogle(WidgetRef ref) async {
       throw Exception('Invalid school domain');
     }
 
-    fetchUser(ref);
-
     return userCredential.user;
   } catch (e) {
     print('Google Sign-In Error: $e'); // Use logger in production
@@ -55,8 +56,33 @@ Future<User?> signInWithGoogle(WidgetRef ref) async {
   }
 }
 
+// Fetches user data from backend and returns AppUser.
+Future<AppUser?> fetchUser() async {
+  try {
+    final headers = await _getHeaders();
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final response = await http.get(
+      Uri.parse('$_baseUrl/user/$userId'),
+      headers: headers,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch user: ${response.body}');
+    }
+    return AppUser.fromMap(jsonDecode(response.body)['data']);
+  } catch (e) {
+    print('Fetch User Error: $e'); // Use logger in production
+    return null;
+  }
+}
 
+// Retrieves Firebase ID token for authenticated requests.
+Future<Map<String, String>> _getHeaders() async {
+  final token = await _getIdToken();
+  if (token == null) throw Exception('No authentication token available');
+  return {'Authorization': 'Bearer $token'};
+}
 
+// Gets Firebase ID token for the current user.
 Future<String?> _getIdToken() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return null;
@@ -67,29 +93,7 @@ Future<String?> _getIdToken() async {
   }
 }
 
-Future<Map<String, String>> _getHeaders() async {
-  final token = await _getIdToken();
-  if (token == null) throw Exception('No authentication token available');
-  return {'Authorization': 'Bearer $token'};
-}
-
-Future<void> fetchUser(WidgetRef ref) async {
-  final headers = await _getHeaders();
-  final userId = FirebaseAuth.instance.currentUser!.uid;
-  final response = await http.get(
-    Uri.parse('$_baseUrl/user/$userId'),
-    headers: headers,
-  );
-  if (response.statusCode != 200) {
-    throw Exception('Failed to fetch user: ${response.body}');
-  }
-  ref
-      .watch(userNotifierProvider.notifier)
-      .setUser(AppUser.fromJson(response.body));
-
-  print('User data: ${response.body}');
-}
-
+// Signs out the user from Google and Firebase.
 Future<void> signOut() async {
   await GoogleSignIn.instance.signOut();
   await FirebaseAuth.instance.signOut();

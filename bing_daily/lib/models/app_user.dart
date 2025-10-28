@@ -8,7 +8,7 @@ class AppUser {
   final String email;
   final String username;
   final String joinDate;
-  List<String> communities;
+  List<dynamic> communities;
 
   AppUser({
     required this.userId,
@@ -23,7 +23,7 @@ class AppUser {
     String? email,
     String? username,
     String? joinDate,
-    List<String>? communities,
+    List<dynamic>? communities,
   }) {
     return AppUser(
       userId: userId ?? this.userId,
@@ -50,7 +50,7 @@ class AppUser {
       email: map['email'] as String,
       username: map['username'] as String,
       joinDate: map['joinDate'] as String,
-      communities: List<String>.from((map['communities'] as List<String>)),
+      communities: map['communities'],
     );
   }
 
