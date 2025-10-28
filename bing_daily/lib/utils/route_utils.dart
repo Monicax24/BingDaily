@@ -1,3 +1,4 @@
+import 'package:bing_daily/models/app_user.dart';
 import 'package:bing_daily/providers/auth_provider.dart';
 import 'package:bing_daily/screens/login_screen.dart';
 import 'package:bing_daily/screens/username_setup_screen.dart';
@@ -13,7 +14,7 @@ GoRouter createRouter(WidgetRef ref) {
         path: '/',
         builder: (context, state) => const LoginScreen(),
         redirect: (context, state) {
-          final user = ref.watch(authStateProvider).value;
+          final AppUser? user = ref.watch(userNotifierProvider);
           if (user != null) {
             return '/main'; // Redirect to main if logged in
           }
@@ -24,7 +25,7 @@ GoRouter createRouter(WidgetRef ref) {
         path: '/main',
         builder: (context, state) => const MainScreen(),
         redirect: (context, state) {
-          final user = ref.watch(authStateProvider).value;
+          final AppUser? user = ref.watch(userNotifierProvider);
           if (user == null) {
             return '/'; // Redirect to login if not logged in
           }
