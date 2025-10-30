@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1098874852025-a9s3cs9lqngt60r7ghicr76cl3r5ejlk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bing_daily",
+            "certificate_hash": "91ceab65d613aad2c7d00047b65c475b0a6ce4d1"
+          }
+        },
+        {
           "client_id": "1098874852025-pm39nsve54gqsmbi3fn46m83kcnauk16.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -39,10 +47,10 @@
               "client_type": 3
             },
             {
-              "client_id": "1098874852025-rkudo82gnti4un9764gq1h59uugasiop.apps.googleusercontent.com",
+              "client_id": "1098874852025-b617vu599besqcd6f8886coeko0p6kgf.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.bingDaily"
+                "bundle_id": "com.bing.bingDaily"
               }
             }
           ]
