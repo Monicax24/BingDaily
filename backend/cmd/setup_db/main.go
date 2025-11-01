@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
@@ -19,10 +21,10 @@ func main() {
 	}
 	defer db.Close()
 
-	// First, drop all tables if they exist (clean start)
+	// Clean up existing tables
 	fmt.Println("🧹 Cleaning up existing tables...")
 	cleanupStatements := []string{
-		"DROP TABLE IF EXISTS posts CASCADE",
+		"DROP TABLE IF EXISTS dailies CASCADE",
 		"DROP TABLE IF EXISTS communities CASCADE",
 		"DROP TABLE IF EXISTS users CASCADE",
 	}
@@ -34,49 +36,49 @@ func main() {
 		}
 	}
 
-	// Create tables in correct order with CORRECT column names
-	fmt.Println("🏗️ Creating tables...")
+	// Create tables with UML-matching schema
+	fmt.Println("🏗️ Creating tables with UML-matching schema...")
 	sqlStatements := []string{
-		// 1. Users table
+		// Users table matching UML
 		`CREATE TABLE users (
-			id SERIAL PRIMARY KEY,
-			name TEXT NOT NULL,
-			email TEXT UNIQUE NOT NULL,
-			profile_picture TEXT DEFAULT '',
+			user_id SERIAL PRIMARY KEY,
+			name VARCHAR(100) NOT NULL,
+			email VARCHAR(255) UNIQUE NOT NULL,
+			profile_picture TEXT,
 			joined_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			communities JSONB DEFAULT '[]',
-			friends JSONB DEFAULT '[]',
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			communities INTEGER[] DEFAULT '{}',
+			friends INTEGER[] DEFAULT '{}'
 		)`,
 
-		// 2. Communities table
+		// Communities table matching UML
 		`CREATE TABLE communities (
 			community_id SERIAL PRIMARY KEY,
-			picture TEXT DEFAULT '',
+			picture TEXT,
 			description TEXT,
-			members JSONB DEFAULT '[]',
-			moderators JSONB DEFAULT '[]',
-			posts JSONB DEFAULT '[]',
-			post_time TIME DEFAULT '09:00:00',
-			default_prompt TEXT DEFAULT 'What did you do today?'
+			members INTEGER[] DEFAULT '{}',
+			moderators INTEGER[] DEFAULT '{}',
+			posts INTEGER[] DEFAULT '{}',
+			post_time VARCHAR(20) DEFAULT '09:00',
+			default_prompt VARCHAR(255) DEFAULT 'What did you do today?'
 		)`,
 
-		// 3. Posts table
-		`CREATE TABLE posts (
+		// Dailies table matching UML (renamed from posts)
+		`CREATE TABLE dailies (
 			post_id SERIAL PRIMARY KEY,
 			community_id INTEGER REFERENCES communities(community_id) ON DELETE CASCADE,
 			picture TEXT NOT NULL,
 			caption TEXT,
-			author INTEGER REFERENCES users(id) ON DELETE CASCADE,
+			author INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
 			time_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			likes JSONB DEFAULT '[]'
+			likes INTEGER DEFAULT 0
 		)`,
 
 		// Indexes
 		`CREATE INDEX idx_users_email ON users(email)`,
-		`CREATE INDEX idx_posts_community ON posts(community_id)`,
-		`CREATE INDEX idx_posts_author ON posts(author)`,
-		`CREATE INDEX idx_posts_time ON posts(time_posted)`,
+		`CREATE INDEX idx_users_name ON users(name)`,
+		`CREATE INDEX idx_dailies_community ON dailies(community_id)`,
+		`CREATE INDEX idx_dailies_author ON dailies(author)`,
+		`CREATE INDEX idx_dailies_time ON dailies(time_posted)`,
 	}
 
 	for i, sql := range sqlStatements {
@@ -88,5 +90,5 @@ func main() {
 		fmt.Printf("✅ Created table/index %d\n", i+1)
 	}
 
-	fmt.Println("\n🎉 Database setup complete! All tables created successfully.")
+	fmt.Println("\n🎉 Database setup complete! All tables created with UML-matching schema.")
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"bingdaily/backend/internal/database"
 	"bingdaily/backend/internal/database/communities"
-	"bingdaily/backend/internal/database/posts"
+	"bingdaily/backend/internal/database/dailies" // Changed from posts to dailies
 	"bingdaily/backend/internal/database/users"
 	"database/sql"
 	"fmt"
@@ -15,8 +15,8 @@ import (
 func demoOperations(db *sql.DB) {
 	fmt.Println("\n🚀 Demo Operations:")
 
-	// Create a test community
-	communityID, err := communities.CreateCommunity(db, "community1.jpg", "Daily photo sharing community", "09:00:00", "Share your daily photo!")
+	// Create a test community - updated parameters to match new schema
+	communityID, err := communities.CreateCommunity(db, "community1.jpg", "Daily photo sharing community", "09:00", "Share your daily photo!")
 	if err != nil {
 		log.Printf("Community creation failed: %v", err)
 	} else {
@@ -53,26 +53,26 @@ func demoOperations(db *sql.DB) {
 		fmt.Printf("✅ User %d joined community %d\n", user2, communityID)
 	}
 
-	// Create a post
-	postID, err := posts.CreatePost(db, communityID, "sunset.jpg", "Beautiful sunset today!", user1)
+	// Create a daily post - using dailies package instead of posts
+	dailyID, err := dailies.CreateDaily(db, communityID, "sunset.jpg", "Beautiful sunset today!", user1)
 	if err != nil {
-		log.Printf("Post creation failed: %v", err)
+		log.Printf("Daily creation failed: %v", err)
 	} else {
-		fmt.Printf("✅ Created post with ID: %d\n", postID)
+		fmt.Printf("✅ Created daily with ID: %d\n", dailyID)
 	}
 
-	// Like the post
-	err = posts.LikePost(db, postID, user2)
+	// Like the daily post
+	err = dailies.LikeDaily(db, dailyID, user2)
 	if err != nil {
-		log.Printf("Like post failed: %v", err)
+		log.Printf("Like daily failed: %v", err)
 	} else {
-		fmt.Printf("✅ User %d liked post %d\n", user2, postID)
+		fmt.Printf("✅ User %d liked daily %d\n", user2, dailyID)
 	}
 
-	// Check if user has posted today
-	hasPosted, err := posts.HasPostedToday(db, user1, communityID)
+	// Check if user has posted today - updated function name
+	hasPosted, err := dailies.HasPostedToday(db, user1, communityID)
 	if err != nil {
-		log.Printf("Check post failed: %v", err)
+		log.Printf("Check daily post failed: %v", err)
 	} else {
 		fmt.Printf("✅ User %d has posted today: %t\n", user1, hasPosted)
 	}
@@ -89,7 +89,6 @@ func main() {
 	fmt.Println("Working directory:", wd)
 	fmt.Println("==================")
 
-	// CHANGE THIS TO USE .envrc
 	// Connect to database
 	dsn := os.Getenv("PG_DSN")
 	if dsn == "" {
@@ -121,11 +120,11 @@ func main() {
 		log.Fatal("Failed to list tables:", err)
 	}
 
-	// Show table structures
+	// Show table structures - updated table names
 	if err := database.ShowTableStructure(db, "communities"); err != nil {
 		log.Fatal("Failed to show table structure:", err)
 	}
-	if err := database.ShowTableStructure(db, "posts"); err != nil {
+	if err := database.ShowTableStructure(db, "dailies"); err != nil { // Changed from posts to dailies
 		log.Fatal("Failed to show table structure:", err)
 	}
 	if err := database.ShowTableStructure(db, "users"); err != nil {

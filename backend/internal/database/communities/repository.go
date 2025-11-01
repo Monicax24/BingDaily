@@ -2,8 +2,6 @@ package communities
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
 )
 
 // Create a new community
@@ -13,30 +11,24 @@ func CreateCommunity(db *sql.DB, picture, description, postTime, defaultPrompt s
 		INSERT INTO communities (picture, description, members, moderators, posts, post_time, default_prompt) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7) 
 		RETURNING community_id`,
-		picture, description, "[]", "[]", "[]", postTime, defaultPrompt).Scan(&communityID)
+		picture, description, "{}", "{}", "{}", postTime, defaultPrompt).Scan(&communityID)
 	return communityID, err
 }
 
 // Get community by ID
 func GetCommunity(db *sql.DB, communityID int) (*Community, error) {
 	var community Community
-	var membersJSON, moderatorsJSON, postsJSON string
 
 	err := db.QueryRow(`
 		SELECT community_id, picture, description, members, moderators, posts, post_time, default_prompt
 		FROM communities 
 		WHERE community_id = $1`,
 		communityID).Scan(&community.CommunityID, &community.Picture, &community.Description,
-		&membersJSON, &moderatorsJSON, &postsJSON, &community.PostTime, &community.DefaultPrompt)
+		&community.Members, &community.Moderators, &community.Posts, &community.PostTime, &community.DefaultPrompt)
 
 	if err != nil {
 		return nil, err
 	}
-
-	// Parse JSON arrays
-	json.Unmarshal([]byte(membersJSON), &community.Members)
-	json.Unmarshal([]byte(moderatorsJSON), &community.Moderators)
-	json.Unmarshal([]byte(postsJSON), &community.Posts)
 
 	return &community, nil
 }
@@ -45,9 +37,19 @@ func GetCommunity(db *sql.DB, communityID int) (*Community, error) {
 func JoinCommunity(db *sql.DB, userID, communityID int) error {
 	_, err := db.Exec(`
 		UPDATE communities 
-		SET members = members || $1::jsonb
-		WHERE community_id = $2 AND NOT members @> $3::jsonb`,
-		fmt.Sprintf("[%d]", userID), communityID, fmt.Sprintf("[%d]", userID))
+		SET members = array_append(members, $1)
+		WHERE community_id = $2 AND NOT $1 = ANY(members)`,
+		userID, communityID)
+
+	if err == nil {
+		// Also add community to user's communities array
+		_, err = db.Exec(`
+			UPDATE users 
+			SET communities = array_append(communities, $1)
+			WHERE user_id = $2 AND NOT $1 = ANY(communities)`,
+			communityID, userID)
+	}
+
 	return err
 }
 
@@ -55,9 +57,19 @@ func JoinCommunity(db *sql.DB, userID, communityID int) error {
 func LeaveCommunity(db *sql.DB, userID, communityID int) error {
 	_, err := db.Exec(`
 		UPDATE communities 
-		SET members = members - $1
+		SET members = array_remove(members, $1)
 		WHERE community_id = $2`,
 		userID, communityID)
+
+	if err == nil {
+		// Also remove community from user's communities array
+		_, err = db.Exec(`
+			UPDATE users 
+			SET communities = array_remove(communities, $1)
+			WHERE user_id = $2`,
+			communityID, userID)
+	}
+
 	return err
 }
 
@@ -65,8 +77,8 @@ func LeaveCommunity(db *sql.DB, userID, communityID int) error {
 func AddModerator(db *sql.DB, communityID, userID int) error {
 	_, err := db.Exec(`
 		UPDATE communities 
-		SET moderators = moderators || $1::jsonb
-		WHERE community_id = $2 AND NOT moderators @> $3::jsonb`,
-		fmt.Sprintf("[%d]", userID), communityID, fmt.Sprintf("[%d]", userID))
+		SET moderators = array_append(moderators, $1)
+		WHERE community_id = $2 AND NOT $1 = ANY(moderators)`,
+		userID, communityID)
 	return err
 }
