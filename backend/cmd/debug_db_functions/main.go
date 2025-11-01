@@ -3,7 +3,7 @@ package main
 import (
 	"bingdaily/backend/internal/database"
 	"bingdaily/backend/internal/database/communities"
-	"bingdaily/backend/internal/database/dailies" // Changed from posts to dailies
+	"bingdaily/backend/internal/database/dailies"
 	"bingdaily/backend/internal/database/users"
 	"database/sql"
 	"fmt"
@@ -15,12 +15,12 @@ import (
 func demoOperations(db *sql.DB) {
 	fmt.Println("\n🚀 Demo Operations:")
 
-	// Create a test community - updated parameters to match new schema
+	// Create a test community
 	communityID, err := communities.CreateCommunity(db, "community1.jpg", "Daily photo sharing community", "09:00", "Share your daily photo!")
 	if err != nil {
 		log.Printf("Community creation failed: %v", err)
 	} else {
-		fmt.Printf("✅ Created community with ID: %d\n", communityID)
+		fmt.Printf("✅ Created community with ID: %s\n", communityID)
 	}
 
 	// Register test users with unique emails
@@ -28,14 +28,14 @@ func demoOperations(db *sql.DB) {
 	if err != nil {
 		log.Printf("User registration failed: %v", err)
 	} else {
-		fmt.Printf("✅ Registered user Alice with ID: %d\n", user1)
+		fmt.Printf("✅ Registered user Alice with ID: %s\n", user1)
 	}
 
 	user2, err := users.Register(db, "Bob", fmt.Sprintf("bob%d@bing.com", time.Now().Unix()+1), "bob.jpg")
 	if err != nil {
 		log.Printf("User registration failed: %v", err)
 	} else {
-		fmt.Printf("✅ Registered user Bob with ID: %d\n", user2)
+		fmt.Printf("✅ Registered user Bob with ID: %s\n", user2)
 	}
 
 	// Users join community
@@ -43,22 +43,22 @@ func demoOperations(db *sql.DB) {
 	if err != nil {
 		log.Printf("Join community failed: %v", err)
 	} else {
-		fmt.Printf("✅ User %d joined community %d\n", user1, communityID)
+		fmt.Printf("✅ User %s joined community %s\n", user1, communityID)
 	}
 
 	err = communities.JoinCommunity(db, user2, communityID)
 	if err != nil {
 		log.Printf("Join community failed: %v", err)
 	} else {
-		fmt.Printf("✅ User %d joined community %d\n", user2, communityID)
+		fmt.Printf("✅ User %s joined community %s\n", user2, communityID)
 	}
 
-	// Create a daily post - using dailies package instead of posts
+	// Create a daily post
 	dailyID, err := dailies.CreateDaily(db, communityID, "sunset.jpg", "Beautiful sunset today!", user1)
 	if err != nil {
 		log.Printf("Daily creation failed: %v", err)
 	} else {
-		fmt.Printf("✅ Created daily with ID: %d\n", dailyID)
+		fmt.Printf("✅ Created daily with ID: %s\n", dailyID)
 	}
 
 	// Like the daily post
@@ -66,15 +66,15 @@ func demoOperations(db *sql.DB) {
 	if err != nil {
 		log.Printf("Like daily failed: %v", err)
 	} else {
-		fmt.Printf("✅ User %d liked daily %d\n", user2, dailyID)
+		fmt.Printf("✅ User %s liked daily %s\n", user2, dailyID)
 	}
 
-	// Check if user has posted today - updated function name
+	// Check if user has posted today
 	hasPosted, err := dailies.HasPostedToday(db, user1, communityID)
 	if err != nil {
 		log.Printf("Check daily post failed: %v", err)
 	} else {
-		fmt.Printf("✅ User %d has posted today: %t\n", user1, hasPosted)
+		fmt.Printf("✅ User %s has posted today: %t\n", user1, hasPosted)
 	}
 
 	fmt.Println("\n🎉 Demo completed successfully!")
@@ -120,11 +120,11 @@ func main() {
 		log.Fatal("Failed to list tables:", err)
 	}
 
-	// Show table structures - updated table names
+	// Show table structures
 	if err := database.ShowTableStructure(db, "communities"); err != nil {
 		log.Fatal("Failed to show table structure:", err)
 	}
-	if err := database.ShowTableStructure(db, "dailies"); err != nil { // Changed from posts to dailies
+	if err := database.ShowTableStructure(db, "dailies"); err != nil {
 		log.Fatal("Failed to show table structure:", err)
 	}
 	if err := database.ShowTableStructure(db, "users"); err != nil {
