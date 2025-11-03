@@ -1,10 +1,11 @@
 import 'package:bing_daily/api/firebase_auth.dart';
 import 'package:bing_daily/constants.dart';
 import 'package:bing_daily/providers/auth_provider.dart';
+import 'package:bing_daily/widgets/notification_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Account page displaying user profile info and sign-out option.
+/// Account page displaying user profile info, notification settings, and sign-out option.
 class AccountPage extends ConsumerWidget {
   const AccountPage({super.key});
 
@@ -14,7 +15,6 @@ class AccountPage extends ConsumerWidget {
     final username = user?.username ?? 'Guest';
     final email = user?.email ?? 'No email';
     final joinDate = user?.joinDate ?? 'Unknown';
-
     // Placeholder avatar with first letter of username
     final String initial = username.isNotEmpty
         ? username[0].toUpperCase()
@@ -29,7 +29,7 @@ class AccountPage extends ConsumerWidget {
         backgroundColor: bingGreen,
       ),
       backgroundColor: bingWhite,
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -69,7 +69,13 @@ class AccountPage extends ConsumerWidget {
               'Member since ${joinDate.substring(0, 10)}',
               style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
-            const SizedBox(height: 80),
+            const SizedBox(height: 24),
+            // Notification settings for communities
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: NotificationSettings(communities: user?.communities ?? []),
+            ),
+            const SizedBox(height: 24),
             // Sign out button
             GestureDetector(
               onTap: () async => await signOut(),
@@ -85,7 +91,7 @@ class AccountPage extends ConsumerWidget {
                 ),
                 child: const Text(
                   'Sign Out',
-                  style: TextStyle(fontSize: 12, color: Colors.blue),
+                  style: TextStyle(fontSize: 16, color: Colors.blue),
                 ),
               ),
             ),
