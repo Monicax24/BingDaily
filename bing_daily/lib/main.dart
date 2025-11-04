@@ -1,3 +1,4 @@
+import 'package:bing_daily/api/notification_api.dart';
 import 'package:bing_daily/constants.dart';
 import 'package:bing_daily/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +12,9 @@ void main() async {
     name: 'bing-daily',
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await NotificationApi().initNotifications();
+
+  
   runApp(const ProviderScope(child: MyApp()));
 }
 

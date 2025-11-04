@@ -59,13 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCiwx1x4hUKcRb5HE2u0-0-BxxUcrQ1jAw',
-    appId: '1:1098874852025:ios:2ec1a8e7f9b3abb10e8168',
+    appId: '1:1098874852025:ios:7e06ea95156f50ed0e8168',
     messagingSenderId: '1098874852025',
     projectId: 'bing-daily',
     storageBucket: 'bing-daily.firebasestorage.app',
     androidClientId: '1098874852025-9cm4o3taotgntmu3gcokdkm8mknatulk.apps.googleusercontent.com',
-    iosClientId: '1098874852025-rkudo82gnti4un9764gq1h59uugasiop.apps.googleusercontent.com',
-    iosBundleId: 'com.example.bingDaily',
+    iosClientId: '1098874852025-b617vu599besqcd6f8886coeko0p6kgf.apps.googleusercontent.com',
+    iosBundleId: 'com.bing.bingDaily',
   );
 
 }
