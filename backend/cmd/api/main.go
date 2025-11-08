@@ -1,14 +1,29 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/gin-gonic/gin"
+
 	"bingdaily/backend/internal/database"
 	"bingdaily/backend/internal/firebase"
 	"bingdaily/backend/internal/server"
-
-	"github.com/gin-gonic/gin"
+	"bingdaily/backend/internal/storage"
 )
 
 func main() {
+	// ensure that env var is set
+	env_set := os.Getenv("BINGDAILY_ENV_SET")
+
+	if env_set == "" {
+		fmt.Println("Environment variables are not set!")
+		os.Exit(1)
+	}
+
+	// init storage
+	strge := storage.InitializeStorage()
+
 	// init auth
 	authClient := firebase.InitializeAuthClient()
 
@@ -23,6 +38,7 @@ func main() {
 		AuthClient: authClient,
 		DB:         db,
 		Router:     router,
+		Storage:    strge,
 	}
 
 	server.RegisterRoutes(s)

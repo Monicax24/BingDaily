@@ -2,6 +2,7 @@ package server
 
 import (
 	"bingdaily/backend/internal/firebase"
+	"bingdaily/backend/internal/storage"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -16,6 +17,7 @@ type Server struct {
 	Router     *gin.Engine
 	DB         *sql.DB
 	AuthClient *auth.Client
+	Storage    *storage.Storage
 }
 
 // Helper function for sending server responses
@@ -79,6 +81,7 @@ func (s *Server) authenticateUser(c *gin.Context) {
 		return
 	}
 	c.Set("userId", uid)
+
 }
 
 // TODO: come up with better error handling scheme (panics, dont leak internal, etc.)
