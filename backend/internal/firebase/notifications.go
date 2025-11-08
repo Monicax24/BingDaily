@@ -31,7 +31,7 @@ func initFirebaseApp() (*firebase.App, error) {
 			app, appErr = firebase.NewApp(context.Background(), nil, option.WithCredentialsFile(path))
 			return
 		}
-		app, appErr = firebase.NewApp(context.Background(), nil, option.WithCredentialsFile("notifications/firebase/serviceAccount.json"))
+		app, appErr = firebase.NewApp(context.Background(), nil, option.WithCredentialsFile("serviceAccount.json"))
 	})
 	return app, appErr
 }

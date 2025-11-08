@@ -3,3 +3,5 @@
 .venv
 *key.json
 firebase_key.json
+key.json
+serviceAccount.json
