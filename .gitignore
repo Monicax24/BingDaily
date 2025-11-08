@@ -1,4 +1,5 @@
 .envrc
 .env
 .venv
-key.json
+*key.json
+firebase_key.json
