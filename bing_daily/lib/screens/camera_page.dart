@@ -16,16 +16,16 @@ class _CameraPageState extends State<CameraPage> {
 
   /// Requests gallery permission and opens camera roll for image selection.
   Future<void> _pickImage() async {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      // the following line is for camera access instead of gallery, but I cannot test it right now
-      // final XFile? cameraImage = await picker.pickImage(source: ImageSource.camera);
-      if (image != null) {
-        setState(() {
-          _selectedImage = image;
-        });
-        _showImagePreviewDialog(image);
-      }
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // the following line is for camera access instead of gallery, but I cannot test it right now
+    // final XFile? cameraImage = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        _selectedImage = image;
+      });
+      _showImagePreviewDialog(image);
+    }
   }
 
   /// Displays a dialog with the selected image and Submit/Retake buttons.
@@ -81,28 +81,72 @@ class _CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(appTitle), backgroundColor: bingGreen),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _pickImage,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: bingAccent,
-                foregroundColor: bingWhite,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 75.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 38,
+                ),
+                child: const Text(
+                  'Today\'s Prompt:',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              child: const Text(cameraButtonText),
-            ),
-            if (_selectedImage != null) ...[
-              const SizedBox(height: 20),
-              Image.file(
-                File(_selectedImage!.path),
-                height: 200,
-                fit: BoxFit.cover,
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 28.0),
+                child: Text(
+                  "Share a photo of something that makes you happy!",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
               ),
+              const SizedBox(height: 150),
+              ElevatedButton(
+                onPressed: _pickImage,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: bingGreen,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30.0,
+                    vertical: 10.0,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: const Text(
+                  cameraButtonText,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              if (_selectedImage != null) ...[
+                const SizedBox(height: 20),
+                Image.file(
+                  File(_selectedImage!.path),
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       backgroundColor: bingWhite,

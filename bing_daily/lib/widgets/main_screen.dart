@@ -2,7 +2,6 @@ import 'package:bing_daily/constants.dart';
 import 'package:bing_daily/screens/account_page.dart';
 import 'package:bing_daily/screens/camera_page.dart';
 import 'package:bing_daily/screens/home_page.dart';
-import 'package:bing_daily/screens/unposted_page.dart';
 import 'package:flutter/material.dart';
 
 /// Main screen with bottom navigation bar for Home, Camera, and Account pages.
@@ -17,13 +16,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   // List of pages for navigation
-  static const List<Widget> _pages = [
-    HomePage(),
-    CameraPage(),
-    AccountPage(),
-    UnpostedPage(),
-    AccountPage(),
-  ];
+  static const List<Widget> _pages = [HomePage(), CameraPage(), AccountPage()];
 
   /// Updates the selected page index when a nav item is tapped.
   void _onItemTapped(int index) {
@@ -42,12 +35,10 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_box_outlined),
             label: 'Post',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Unposted'),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline_rounded),
             label: 'Account',
