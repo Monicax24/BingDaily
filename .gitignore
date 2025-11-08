@@ -2,3 +2,5 @@
 .env
 .venv
 key.json
+
+serviceAccount.json

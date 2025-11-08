@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	push "myfirebaseapp/notifications/firebase"
+	push "bingdaily/backend/internal/firebase"
 )
 
 type registerReq struct {
