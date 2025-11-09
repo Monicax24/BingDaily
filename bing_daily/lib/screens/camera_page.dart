@@ -1,17 +1,19 @@
 import 'dart:io';
 import 'package:bing_daily/constants.dart';
+import 'package:bing_daily/providers/has_posted_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Camera page for selecting and previewing images from the gallery.
-class CameraPage extends StatefulWidget {
+class CameraPage extends ConsumerStatefulWidget {
   const CameraPage({super.key});
 
   @override
-  State<CameraPage> createState() => _CameraPageState();
+  ConsumerState<CameraPage> createState() => _CameraPageState();
 }
 
-class _CameraPageState extends State<CameraPage> {
+class _CameraPageState extends ConsumerState<CameraPage> {
   XFile? _selectedImage;
 
   /// Requests gallery permission and opens camera roll for image selection.
@@ -49,6 +51,7 @@ class _CameraPageState extends State<CameraPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Image submitted')),
                     );
+                    ref.read(hasPostedProvider.notifier).state = true;
                     setState(() {
                       _selectedImage = null;
                     });
@@ -88,12 +91,9 @@ class _CameraPageState extends State<CameraPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 38,
-                ),
-                child: const Text(
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 38),
+                child: Text(
                   'Today\'s Prompt:',
                   style: TextStyle(
                     fontSize: 28,
