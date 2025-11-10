@@ -16,7 +16,12 @@ func demoOperations(db *sql.DB) {
 	fmt.Println("\n🚀 Demo Operations:")
 
 	// Create a test community
-	communityID, err := communities.CreateCommunity(db, "community1.jpg", "Daily photo sharing community", "09:00", "Share your daily photo!")
+	communityID, err := communities.CreateCommunity(db,
+		"Daily Photos",                  // name
+		"community1.jpg",                // picture
+		"Daily photo sharing community", // description
+		"09:00",                         // postTime
+		"Share your daily photo!")       // defaultPrompt
 	if err != nil {
 		log.Printf("Community creation failed: %v", err)
 	} else {
