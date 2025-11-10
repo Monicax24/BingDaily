@@ -21,81 +21,79 @@ class AccountPage extends ConsumerWidget {
         : 'G';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          accountLabel,
-          style: TextStyle(color: bingWhite, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: bingGreen,
-      ),
       backgroundColor: bingWhite,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40),
-            // Profile picture placeholder
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: bingGreen,
-              child: Text(
-                initial,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 70.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              // Profile picture placeholder
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: bingGreen,
+                child: Text(
+                  initial,
+                  style: const TextStyle(
+                    fontSize: 48,
+                    color: bingWhite,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Username
+              Text(
+                username,
                 style: const TextStyle(
-                  fontSize: 48,
-                  color: bingWhite,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: bingGreen,
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            // Username
-            Text(
-              username,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: bingGreen,
+              const SizedBox(height: 8),
+              // Email
+              Text(
+                email,
+                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
               ),
-            ),
-            const SizedBox(height: 8),
-            // Email
-            Text(
-              email,
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 8),
-            // Join date
-            Text(
-              'Member since ${joinDate.substring(0, 10)}',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 24),
-            // Notification settings for communities
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: NotificationSettings(communities: user?.communities ?? []),
-            ),
-            const SizedBox(height: 24),
-            // Sign out button
-            GestureDetector(
-              onTap: () async => await signOut(),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 30,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: const Text(
-                  'Sign Out',
-                  style: TextStyle(fontSize: 16, color: Colors.blue),
+              const SizedBox(height: 8),
+              // Join date
+              Text(
+                'Member since ${joinDate.substring(0, 10)}',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 24),
+              // Notification settings for communities
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: NotificationSettings(
+                  communities: user?.communities ?? [],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              // Sign out button
+              GestureDetector(
+                onTap: () async => await signOut(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 30,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: const Text(
+                    'Sign Out',
+                    style: TextStyle(fontSize: 16, color: Colors.blue),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
