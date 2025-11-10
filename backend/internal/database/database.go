@@ -7,7 +7,7 @@ import (
 
 // VerifyDatabaseStructure checks all required tables exist
 func VerifyDatabaseStructure(db *sql.DB) error {
-	requiredTables := []string{"communities", "posts", "users"}
+	requiredTables := []string{"communities", "dailies", "users"}
 
 	for _, table := range requiredTables {
 		var exists bool

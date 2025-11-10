@@ -123,9 +123,7 @@ func demoOperations(db *sql.DB) {
 func main() {
 	// Debug info
 	fmt.Println("=== DEBUG INFO ===")
-
 	fmt.Println("PG_DSN:", os.Getenv("PG_DSN"))
-	fmt.Println("DATABASE_URL:", os.Getenv("DATABASE_URL"))
 	wd, _ := os.Getwd()
 	fmt.Println("Working directory:", wd)
 	fmt.Println("==================")
@@ -135,8 +133,6 @@ func main() {
 	if dsn == "" {
 		log.Fatal("PG_DSN environment variable is not set")
 	}
-
-	fmt.Println("Connecting with DSN:", dsn)
 
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
@@ -150,31 +146,9 @@ func main() {
 	}
 	fmt.Println("✅ Connected to database!")
 
-	// Verify the required tables exist
-	fmt.Println("\n🔍 Checking database structure...")
+	// Verify database structure
 	if err := database.VerifyDatabaseStructure(db); err != nil {
 		log.Fatal("❌ Database structure issue:", err)
 	}
-
-	// Show current tables
-	if err := database.ListAllTables(db); err != nil {
-		log.Fatal("Failed to list tables:", err)
-	}
-
-	// Show table structures
-	if err := database.ShowTableStructure(db, "communities"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-	if err := database.ShowTableStructure(db, "dailies"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-	if err := database.ShowTableStructure(db, "users"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-
-	// Your application logic starts here
-	fmt.Println("\n🎉 Database is ready! Starting application...")
-
-	// Demo some operations
 	demoOperations(db)
 }

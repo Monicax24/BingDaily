@@ -36,41 +36,40 @@ func main() {
 		}
 	}
 
-	// Create tables with UML-matching schema
-	fmt.Println("🏗️ Creating tables with UML-matching schema...")
+	// Create tables with string IDs
+	fmt.Println("🏗️ Creating tables with string IDs...")
 	sqlStatements := []string{
-		// Users table matching UML
+		// Users table with string IDs
 		`CREATE TABLE users (
-			user_id SERIAL PRIMARY KEY,
+			user_id VARCHAR(50) PRIMARY KEY,
 			name VARCHAR(100) NOT NULL,
 			email VARCHAR(255) UNIQUE NOT NULL,
 			profile_picture TEXT,
 			joined_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			communities INTEGER[] DEFAULT '{}',
-			friends INTEGER[] DEFAULT '{}'
+			communities TEXT[] DEFAULT '{}'
 		)`,
 
-		// Communities table matching UML
+		// Communities table with string IDs
 		`CREATE TABLE communities (
-			community_id SERIAL PRIMARY KEY,
+			community_id VARCHAR(50) PRIMARY KEY,
+			name VARCHAR(100) NOT NULL,
 			picture TEXT,
 			description TEXT,
-			members INTEGER[] DEFAULT '{}',
-			moderators INTEGER[] DEFAULT '{}',
-			posts INTEGER[] DEFAULT '{}',
+			members TEXT[] DEFAULT '{}',
+			posts TEXT[] DEFAULT '{}',
 			post_time VARCHAR(20) DEFAULT '09:00',
 			default_prompt VARCHAR(255) DEFAULT 'What did you do today?'
 		)`,
 
-		// Dailies table matching UML (renamed from posts)
+		// Dailies table with string IDs
 		`CREATE TABLE dailies (
-			post_id SERIAL PRIMARY KEY,
-			community_id INTEGER REFERENCES communities(community_id) ON DELETE CASCADE,
+			post_id VARCHAR(50) PRIMARY KEY,
+			community_id VARCHAR(50) REFERENCES communities(community_id) ON DELETE CASCADE,
 			picture TEXT NOT NULL,
 			caption TEXT,
-			author INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+			author VARCHAR(50) REFERENCES users(user_id) ON DELETE CASCADE,
 			time_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			likes INTEGER DEFAULT 0
+			likes TEXT[] DEFAULT '{}'
 		)`,
 
 		// Indexes
@@ -79,6 +78,7 @@ func main() {
 		`CREATE INDEX idx_dailies_community ON dailies(community_id)`,
 		`CREATE INDEX idx_dailies_author ON dailies(author)`,
 		`CREATE INDEX idx_dailies_time ON dailies(time_posted)`,
+		`CREATE INDEX idx_communities_name ON communities(name)`,
 	}
 
 	for i, sql := range sqlStatements {
@@ -90,5 +90,5 @@ func main() {
 		fmt.Printf("✅ Created table/index %d\n", i+1)
 	}
 
-	fmt.Println("\n🎉 Database setup complete! All tables created with UML-matching schema.")
+	fmt.Println("\n🎉 Database setup complete! All tables created with string IDs.")
 }
