@@ -10,6 +10,8 @@ import (
 	"log"
 	"os"
 	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func demoOperations(db *sql.DB) {
@@ -82,6 +84,39 @@ func demoOperations(db *sql.DB) {
 		fmt.Printf("✅ User %s has posted today: %t\n", user1, hasPosted)
 	}
 
+	// Like the daily post
+	err = dailies.LikeDaily(db, dailyID, user2)
+	if err != nil {
+		log.Printf("Like daily failed: %v", err)
+	} else {
+		fmt.Printf("✅ User %s liked daily %s\n", user2, dailyID)
+	}
+
+	// Demo: Delete the daily post
+	fmt.Println("\n🗑️ Testing delete operations...")
+	err = dailies.DeleteDaily(db, dailyID)
+	if err != nil {
+		log.Printf("Delete daily failed: %v", err)
+	} else {
+		fmt.Printf("✅ Deleted daily with ID: %s\n", dailyID)
+	}
+
+	// Verify the daily was deleted
+	_, err = dailies.GetDaily(db, dailyID)
+	if err != nil {
+		fmt.Printf("✅ Confirmed daily %s no longer exists: %v\n", dailyID, err)
+	} else {
+		fmt.Printf("❌ Daily %s still exists after deletion\n", dailyID)
+	}
+
+	// Create another daily to test bulk deletion
+	dailyID2, err := dailies.CreateDaily(db, communityID, "mountain.jpg", "Great hike today!", user1)
+	if err != nil {
+		log.Printf("Second daily creation failed: %v", err)
+	} else {
+		fmt.Printf("✅ Created second daily with ID: %s\n", dailyID2)
+	}
+
 	fmt.Println("\n🎉 Demo completed successfully!")
 }
 
@@ -89,7 +124,6 @@ func main() {
 	// Debug info
 	fmt.Println("=== DEBUG INFO ===")
 	fmt.Println("PG_DSN:", os.Getenv("PG_DSN"))
-	fmt.Println("DATABASE_URL:", os.Getenv("DATABASE_URL"))
 	wd, _ := os.Getwd()
 	fmt.Println("Working directory:", wd)
 	fmt.Println("==================")
@@ -99,8 +133,6 @@ func main() {
 	if dsn == "" {
 		log.Fatal("PG_DSN environment variable is not set")
 	}
-
-	fmt.Println("Connecting with DSN:", dsn)
 
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
@@ -114,31 +146,9 @@ func main() {
 	}
 	fmt.Println("✅ Connected to database!")
 
-	// Verify the required tables exist
-	fmt.Println("\n🔍 Checking database structure...")
+	// Verify database structure
 	if err := database.VerifyDatabaseStructure(db); err != nil {
 		log.Fatal("❌ Database structure issue:", err)
 	}
-
-	// Show current tables
-	if err := database.ListAllTables(db); err != nil {
-		log.Fatal("Failed to list tables:", err)
-	}
-
-	// Show table structures
-	if err := database.ShowTableStructure(db, "communities"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-	if err := database.ShowTableStructure(db, "dailies"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-	if err := database.ShowTableStructure(db, "users"); err != nil {
-		log.Fatal("Failed to show table structure:", err)
-	}
-
-	// Your application logic starts here
-	fmt.Println("\n🎉 Database is ready! Starting application...")
-
-	// Demo some operations
 	demoOperations(db)
 }
