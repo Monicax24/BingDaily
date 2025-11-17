@@ -25,9 +25,24 @@ class HomePage extends ConsumerWidget {
 
   /// Builds the view showing list of posts when user has posted.
   Widget _buildPostsView() {
-    return ListView.builder(
-      itemCount: mockPosts.length,
-      itemBuilder: (context, index) => PostCard(post: mockPosts[index]),
+    return Column(
+      children: [
+        Text(
+          "Share a photo of something that makes you happy!",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: mockPosts.length,
+            itemBuilder: (context, index) => PostCard(post: mockPosts[index]),
+          ),
+        ),
+      ]
     );
   }
 
