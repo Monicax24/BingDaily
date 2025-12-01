@@ -13,11 +13,6 @@ func InitializeDatabase() *pgxpool.Pool {
 	if dsn == "" {
 		log.Fatal("PG_DSN environment variable is not set")
 	}
-	// db, err := sql.Open("pgx", dsn)
-	// if err != nil {
-	// 	log.Fatal("Unable to connect to database:", err)
-	// }
-	// return db
 
 	db, err := pgxpool.New(context.TODO(), dsn)
 	if err != nil {

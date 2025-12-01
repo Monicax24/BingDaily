@@ -1,11 +1,12 @@
 package dailies
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Daily struct {
@@ -19,12 +20,12 @@ type Daily struct {
 }
 
 // Create a new daily
-func CreateDaily(db *sql.DB, communityID string, picturePath, caption string, author string) (string, error) {
+func CreateDaily(db *pgxpool.Pool, communityID string, picturePath, caption string, author string) (string, error) {
 	var postID string
 
 	// Verify the author exists
 	var userExists bool
-	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE user_id = $1)", author).Scan(&userExists)
+	err := db.QueryRow(context.TODO(), "SELECT EXISTS(SELECT 1 FROM users WHERE user_id = $1)", author).Scan(&userExists)
 	if err != nil {
 		return "", err
 	}
@@ -36,14 +37,14 @@ func CreateDaily(db *sql.DB, communityID string, picturePath, caption string, au
 	postID = uuid.New().String()
 
 	// Insert into dailies table (picture now stores the file path)
-	_, err = db.Exec(`
+	_, err = db.Exec(context.TODO(), `
 		INSERT INTO dailies (post_id, community_id, picture, caption, author, time_posted, likes) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		postID, communityID, picturePath, caption, author, time.Now(), "{}")
 
 	if err == nil {
 		// Add daily to community's posts array
-		_, err = db.Exec(`
+		_, err = db.Exec(context.TODO(), `
 			UPDATE communities 
 			SET posts = array_append(posts, $1)
 			WHERE community_id = $2`,
@@ -54,10 +55,10 @@ func CreateDaily(db *sql.DB, communityID string, picturePath, caption string, au
 }
 
 // Get daily by ID
-func GetDaily(db *sql.DB, postID string) (*Daily, error) {
+func GetDaily(db *pgxpool.Pool, postID string) (*Daily, error) {
 	var daily Daily
 
-	err := db.QueryRow(`
+	err := db.QueryRow(context.TODO(), `
 		SELECT post_id, community_id, picture, caption, author, time_posted, likes
 		FROM dailies 
 		WHERE post_id = $1`,
@@ -72,9 +73,9 @@ func GetDaily(db *sql.DB, postID string) (*Daily, error) {
 }
 
 // Like a daily
-func LikeDaily(db *sql.DB, postID, userID string) error {
+func LikeDaily(db *pgxpool.Pool, postID, userID string) error {
 	// Add user to likes array if not already present
-	_, err := db.Exec(`
+	_, err := db.Exec(context.TODO(), `
 		UPDATE dailies 
 		SET likes = array_append(likes, $1)
 		WHERE post_id = $2 AND NOT $1 = ANY(likes)`,
@@ -83,9 +84,9 @@ func LikeDaily(db *sql.DB, postID, userID string) error {
 }
 
 // Unlike a daily
-func UnlikeDaily(db *sql.DB, postID, userID string) error {
+func UnlikeDaily(db *pgxpool.Pool, postID, userID string) error {
 	// Remove user from likes array
-	_, err := db.Exec(`
+	_, err := db.Exec(context.TODO(), `
 		UPDATE dailies 
 		SET likes = array_remove(likes, $1)
 		WHERE post_id = $2`,
@@ -94,24 +95,24 @@ func UnlikeDaily(db *sql.DB, postID, userID string) error {
 }
 
 // Check if user has posted today in a community
-func HasPostedToday(db *sql.DB, userID, communityID string) (bool, error) {
+func HasPostedToday(db *pgxpool.Pool, userID, communityID string) (bool, error) {
 	var count int
-	err := db.QueryRow(`
+	err := db.QueryRow(context.TODO(), `
 		SELECT COUNT(*) FROM dailies 
 		WHERE author = $1 AND community_id = $2 AND DATE(time_posted) = CURRENT_DATE`,
 		userID, communityID).Scan(&count)
 	return count > 0, err
 }
-func DeleteDaily(db *sql.DB, postID string) error {
-	tx, err := db.Begin()
+func DeleteDaily(db *pgxpool.Pool, postID string) error {
+	tx, err := db.Begin(context.TODO())
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer tx.Rollback(context.TODO())
 
 	// First get the community ID to remove the post from community's posts array
 	var communityID string
-	err = tx.QueryRow(`
+	err = tx.QueryRow(context.TODO(), `
 		SELECT community_id FROM dailies WHERE post_id = $1`,
 		postID).Scan(&communityID)
 	if err != nil {
@@ -119,7 +120,7 @@ func DeleteDaily(db *sql.DB, postID string) error {
 	}
 
 	// Remove the post from the community's posts array
-	_, err = tx.Exec(`
+	_, err = tx.Exec(context.TODO(), `
 		UPDATE communities 
 		SET posts = array_remove(posts, $1)
 		WHERE community_id = $2`,
@@ -129,7 +130,7 @@ func DeleteDaily(db *sql.DB, postID string) error {
 	}
 
 	// Delete the daily post
-	result, err := tx.Exec(`
+	tag, err := tx.Exec(context.TODO(), `
 		DELETE FROM dailies 
 		WHERE post_id = $1`,
 		postID)
@@ -138,13 +139,10 @@ func DeleteDaily(db *sql.DB, postID string) error {
 	}
 
 	// Check if any row was actually deleted
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to check rows affected: %v", err)
-	}
+	rowsAffected := tag.RowsAffected()
 	if rowsAffected == 0 {
 		return fmt.Errorf("daily post with ID %s not found", postID)
 	}
 
-	return tx.Commit()
+	return tx.Commit(context.TODO())
 }

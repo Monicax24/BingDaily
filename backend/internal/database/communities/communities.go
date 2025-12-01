@@ -1,9 +1,10 @@
 package communities
 
 import (
-	"database/sql"
+	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Community struct {
@@ -18,11 +19,11 @@ type Community struct {
 }
 
 // Create a new community
-func CreateCommunity(db *sql.DB, name, picture, description, postTime, prompt string) (string, error) {
+func CreateCommunity(db *pgxpool.Pool, name, picture, description, postTime, prompt string) (string, error) {
 	// Generate a unique community ID
 	communityID := uuid.New().String()
 
-	_, err := db.Exec(`
+	_, err := db.Exec(context.TODO(), `
 		INSERT INTO communities (community_id, name, picture, description, members, posts, post_time, prompt) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		communityID, name, picture, description, "{}", "{}", postTime, prompt)
@@ -30,11 +31,11 @@ func CreateCommunity(db *sql.DB, name, picture, description, postTime, prompt st
 }
 
 // Get community by ID
-func GetCommunity(db *sql.DB, communityID string) (*Community, error) {
+func GetCommunity(db *pgxpool.Pool, communityID string) (*Community, error) {
 	var community Community
 
-	err := db.QueryRow(`
-		SELECT community_id, picture, description, members, posts, post_time, prompt, name
+	err := db.QueryRow(context.TODO(),
+		`SELECT community_id, picture, description, members, posts, post_time, prompt, name
 		FROM communities 
 		WHERE community_id = $1`,
 		communityID).Scan(&community.CommunityID, &community.Picture, &community.Description,
@@ -48,8 +49,8 @@ func GetCommunity(db *sql.DB, communityID string) (*Community, error) {
 }
 
 // Join a community
-func JoinCommunity(db *sql.DB, userID, communityID string) error {
-	_, err := db.Exec(`
+func JoinCommunity(db *pgxpool.Pool, userID, communityID string) error {
+	_, err := db.Exec(context.TODO(), `
 		UPDATE communities 
 		SET members = array_append(members, $1)
 		WHERE community_id = $2 AND NOT $1 = ANY(members)`,
@@ -57,7 +58,7 @@ func JoinCommunity(db *sql.DB, userID, communityID string) error {
 
 	if err == nil {
 		// Also add community to user's communities array
-		_, err = db.Exec(`
+		_, err = db.Exec(context.TODO(), `
 			UPDATE users 
 			SET communities = array_append(communities, $1)
 			WHERE user_id = $2 AND NOT $1 = ANY(communities)`,
@@ -68,8 +69,8 @@ func JoinCommunity(db *sql.DB, userID, communityID string) error {
 }
 
 // Leave a community
-func LeaveCommunity(db *sql.DB, userID, communityID string) error {
-	_, err := db.Exec(`
+func LeaveCommunity(db *pgxpool.Pool, userID, communityID string) error {
+	_, err := db.Exec(context.TODO(), `
 		UPDATE communities 
 		SET members = array_remove(members, $1)
 		WHERE community_id = $2`,
@@ -77,7 +78,7 @@ func LeaveCommunity(db *sql.DB, userID, communityID string) error {
 
 	if err == nil {
 		// Also remove community from user's communities array
-		_, err = db.Exec(`
+		_, err = db.Exec(context.TODO(), `
 			UPDATE users 
 			SET communities = array_remove(communities, $1)
 			WHERE user_id = $2`,
