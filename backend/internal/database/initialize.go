@@ -1,21 +1,27 @@
 package database
 
 import (
-	"database/sql"
+	"context"
 	"log"
 	"os"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func InitializeDatabase() *sql.DB {
+func InitializeDatabase() *pgxpool.Pool {
 	dsn := os.Getenv("PG_DSN")
 	if dsn == "" {
 		log.Fatal("PG_DSN environment variable is not set")
 	}
-	db, err := sql.Open("pgx", dsn)
+	// db, err := sql.Open("pgx", dsn)
+	// if err != nil {
+	// 	log.Fatal("Unable to connect to database:", err)
+	// }
+	// return db
+
+	db, err := pgxpool.New(context.TODO(), dsn)
 	if err != nil {
-		log.Fatal("Unable to connect to database:", err)
+		log.Fatal(err)
 	}
 	return db
 }

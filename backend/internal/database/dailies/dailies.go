@@ -4,7 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
+
+type Daily struct {
+	PostID      string    `json:"post_id"`
+	CommunityID string    `json:"community_id"`
+	Picture     string    `json:"picture"`
+	Caption     string    `json:"caption"`
+	Author      string    `json:"author"`
+	TimePosted  time.Time `json:"time_posted"`
+	Likes       []string  `json:"likes"`
+}
 
 // Create a new daily
 func CreateDaily(db *sql.DB, communityID string, picturePath, caption string, author string) (string, error) {
@@ -21,7 +33,7 @@ func CreateDaily(db *sql.DB, communityID string, picturePath, caption string, au
 	}
 
 	// Generate a unique post ID
-	postID = fmt.Sprintf("post_%d", time.Now().UnixNano())
+	postID = uuid.New().String()
 
 	// Insert into dailies table (picture now stores the file path)
 	_, err = db.Exec(`

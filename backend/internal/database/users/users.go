@@ -2,9 +2,19 @@ package users
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
+
+type User struct {
+	UserID         string    `json:"user_id"`
+	Name           string    `json:"name"`
+	Email          string    `json:"email"`
+	ProfilePicture string    `json:"profile_picture"`
+	JoinedDate     time.Time `json:"joined_date"`
+	Communities    []string  `json:"communities"` // Array of community IDs
+}
 
 func GetUser(db *sql.DB, userID string) (*User, error) {
 	var user User
@@ -37,7 +47,7 @@ func Register(db *sql.DB, name, email, profilePicture string) (string, error) {
 	}
 
 	// Generate a unique user ID
-	userID := fmt.Sprintf("user_%d", time.Now().UnixNano())
+	userID := uuid.New().String()
 
 	// User doesn't exist, create new one
 	_, err = db.Exec(`

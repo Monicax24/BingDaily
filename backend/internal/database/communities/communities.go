@@ -2,19 +2,30 @@ package communities
 
 import (
 	"database/sql"
-	"fmt"
-	"time"
+
+	"github.com/google/uuid"
 )
 
+type Community struct {
+	CommunityID string   `json:"community_id"`
+	Picture     string   `json:"picture"`
+	Description string   `json:"description"`
+	Members     []string `json:"members"`   // Array of user IDs
+	Posts       []string `json:"posts"`     // Array of post IDs
+	PostTime    string   `json:"post_time"` // Default time for daily posts (e.g., "09:00")
+	Prompt      string   `json:"prompt"`
+	Name        string   `json:"name"`
+}
+
 // Create a new community
-func CreateCommunity(db *sql.DB, name, picture, description, postTime, defaultPrompt string) (string, error) {
+func CreateCommunity(db *sql.DB, name, picture, description, postTime, prompt string) (string, error) {
 	// Generate a unique community ID
-	communityID := fmt.Sprintf("community_%d", time.Now().UnixNano())
+	communityID := uuid.New().String()
 
 	_, err := db.Exec(`
-		INSERT INTO communities (community_id, name, picture, description, members, posts, post_time, default_prompt) 
+		INSERT INTO communities (community_id, name, picture, description, members, posts, post_time, prompt) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-		communityID, name, picture, description, "{}", "{}", postTime, defaultPrompt)
+		communityID, name, picture, description, "{}", "{}", postTime, prompt)
 	return communityID, err
 }
 
@@ -23,11 +34,11 @@ func GetCommunity(db *sql.DB, communityID string) (*Community, error) {
 	var community Community
 
 	err := db.QueryRow(`
-		SELECT community_id, picture, description, members, posts, post_time, default_prompt, name
+		SELECT community_id, picture, description, members, posts, post_time, prompt, name
 		FROM communities 
 		WHERE community_id = $1`,
 		communityID).Scan(&community.CommunityID, &community.Picture, &community.Description,
-		&community.Members, &community.Posts, &community.PostTime, &community.DefaultPrompt, &community.Name)
+		&community.Members, &community.Posts, &community.PostTime, &community.Prompt, &community.Name)
 
 	if err != nil {
 		return nil, err
