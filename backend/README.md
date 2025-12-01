@@ -12,11 +12,10 @@ Some API calls will require authentication to be completed. These requests will 
 Authorization: Bearer <token>
 ```
 
-
 ## User
 
 ### Register User
-`/user/register` | `POST` | `authorization required`
+`/users/register` | `POST` | `authorization required`
 
 For a user to be registered in the backend, they first need to register. The registration request should be formatted like this:
 
@@ -27,7 +26,6 @@ For a user to be registered in the backend, they first need to register. The reg
     "email": string,
     "username": string,
     "joinDate": string*,
-    ...
 }
 ```
 \* The `joinDate` field should follow ISO 8601 (YYYY-MM-DD).
@@ -41,20 +39,21 @@ For a user to be registered in the backend, they first need to register. The reg
 ```
 
 ### Update User Profile
-`/user/update` | `POST` | `authorization required`
+`/users/update` | `POST` | `authorization required`
 
 To update a user's profile, a request should be sent like this:
 
 #### Request
 ```
 {
-    "userId": string, // this field is not modifiable
+    // cant modify
+    "userId": string, 
+
+    // can modify*
     "username": string*,
-    "email": string*,
-    ...
 }
 ```
-\* These fields are optional... only include the fields that need to be updated.
+\* Only include fields that you want to modify 
 
 #### Response
 ```
@@ -66,7 +65,7 @@ To update a user's profile, a request should be sent like this:
 
 ### Retrieve User Profile Data
 
-`/user/<userId>` | `GET` | `authorization required`
+`/users/<userId>` | `GET` | `authorization required`
 
 #### Response
 ```
@@ -97,7 +96,7 @@ To update a user's profile, a request should be sent like this:
 
 ### Retrieve Core Community Data
 
-`/community/<communityId>` | `GET` | `authorization required`
+`/communities/<communityId>` | `GET` | `authorization required`
 
 #### Response
 ```
@@ -116,13 +115,12 @@ To update a user's profile, a request should be sent like this:
     "description': string,
     "prompt": string,
 
-    "memberCnt": int,
-    ...
+    "memberCnt": int
 }
 ```
 
 ### Get Community Posts
-`/community/posts/<communityId>` | `GET` | `authorization required`
+`/communities/posts/<communityId>` | `GET` | `authorization required`
 
 This endpoint is to retrieve all the posts from a community. This request will only be fulfilled if the user requesting the data has already posted within that community.
 
@@ -141,16 +139,16 @@ This endpoint is to retrieve all the posts from a community. This request will o
 {
     "postId": string,
     "communityId": string,
-    "userId": string, // in the DB this is listed as author rn
+    "userId": string,
     
     "caption": string,
     "timePosted": string, // will follow YYYY-DD-MMTHH:MM:SS (ISO 8601)
-    ...
+    "image": string // will be URL to s3 object
 }
 ```
 
 ### Upload Post to Community
-`/community/posts/upload` | `POST` | `authorization required`
+`/communities/posts/upload` | `POST` | `authorization required`
 
 Can only upload 1 post per prompt, so the database will check to see if the posting user has not posted yet.
 
@@ -161,7 +159,6 @@ Can only upload 1 post per prompt, so the database will check to see if the post
     "userId": string,
 
     "caption": string,
-    ...
 }
 ```
 
@@ -170,6 +167,11 @@ Can only upload 1 post per prompt, so the database will check to see if the post
 {
     "status": "success" | "fail",
     "message": string
+    // if image upload required, they can upload from here
+    "data": {
+        "postId": string, // id of the recently created post
+        "upload": string // link to upload media
+    }
 }
 ```
 

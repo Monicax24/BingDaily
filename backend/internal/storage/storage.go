@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	UPLOAD_TIME   time.Duration = 5 * time.Minute
-	DOWNLOAD_TIME time.Duration = 5 * time.Minute
+	UPLOAD_TIME   time.Duration = 24 * time.Hour
+	DOWNLOAD_TIME time.Duration = 24 * time.Hour
 )
 
 type Storage struct {

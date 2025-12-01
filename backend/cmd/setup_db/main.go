@@ -1,24 +1,18 @@
 package main
 
 import (
-	"database/sql"
+	"bingdaily/backend/internal/database"
+	"bingdaily/backend/internal/database/communities"
+	"bingdaily/backend/internal/database/users"
+	"context"
 	"fmt"
 	"log"
-	"os"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/jackc/pgx/v5"
 )
 
 func main() {
-	dsn := os.Getenv("PG_DSN")
-	if dsn == "" {
-		log.Fatal("PG_DSN environment variable is not set")
-	}
-
-	db, err := sql.Open("pgx", dsn)
-	if err != nil {
-		log.Fatal("Unable to connect to database:", err)
-	}
+	db := database.InitializeDatabase()
 	defer db.Close()
 
 	// Clean up existing tables
@@ -30,7 +24,7 @@ func main() {
 	}
 
 	for _, sql := range cleanupStatements {
-		_, err = db.Exec(sql)
+		_, err := db.Exec(context.TODO(), sql)
 		if err != nil {
 			log.Printf("Warning: Failed to drop table: %v", err)
 		}
@@ -42,7 +36,7 @@ func main() {
 		// Users table with string IDs
 		`CREATE TABLE users (
 			user_id VARCHAR(50) PRIMARY KEY,
-			name VARCHAR(100) NOT NULL,
+			name VARCHAR(100) UNIQUE NOT NULL,
 			email VARCHAR(255) UNIQUE NOT NULL,
 			profile_picture TEXT,
 			joined_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -58,7 +52,7 @@ func main() {
 			members TEXT[] DEFAULT '{}',
 			posts TEXT[] DEFAULT '{}',
 			post_time VARCHAR(20) DEFAULT '09:00',
-			default_prompt VARCHAR(255) DEFAULT 'What did you do today?'
+			prompt VARCHAR(255) DEFAULT 'What did you do today?'
 		)`,
 
 		// Dailies table with string IDs
@@ -83,7 +77,7 @@ func main() {
 
 	for i, sql := range sqlStatements {
 		fmt.Printf("Executing statement %d...\n", i+1)
-		_, err = db.Exec(sql)
+		_, err := db.Exec(context.TODO(), sql)
 		if err != nil {
 			log.Fatalf("❌ Failed to execute statement %d: %v\nSQL: %s", i+1, err, sql)
 		}
@@ -91,4 +85,34 @@ func main() {
 	}
 
 	fmt.Println("\n🎉 Database setup complete! All tables created with string IDs.")
+
+	// default community
+	communities.CreateCommunity(
+		db,
+		"ACM Project Team 4",
+		"nopicture.jpg",
+		"default community for testing",
+		"09:00",
+		"Upload a cool photo!",
+	)
+	db.Exec(context.TODO(),
+		`UPDATE public.communities
+		SET community_id = '6a6a671e-2543-4fad-ba82-dedc37338f14'
+		WHERE name = 'ACM Project Team 4'`,
+	)
+
+	// WARNING: remove this after testing
+	// default user
+	users.Register(
+		db,
+		"testuser",
+		"test@test.com",
+		"nopicture.jpg",
+	)
+	// set id for default user
+	db.Exec(context.TODO(),
+		`UPDATE public.users
+		SET user_id = '697b8a69-0c01-4ccb-aabc-6dccd6a22fa3'
+		WHERE name = 'testuser'`,
+	)
 }

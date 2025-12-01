@@ -3,19 +3,18 @@ package server
 import (
 	"bingdaily/backend/internal/firebase"
 	"bingdaily/backend/internal/storage"
-	"database/sql"
 	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-
 	"firebase.google.com/go/v4/auth"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Server struct {
 	Router     *gin.Engine
-	DB         *sql.DB
+	DB         *pgxpool.Pool
 	AuthClient *auth.Client
 	Storage    *storage.Storage
 }
@@ -45,16 +44,16 @@ func RegisterRoutes(s *Server) {
 	s.Router.Use(s.errorHandling)
 
 	// community routes
-	communityGroup := s.Router.Group("/community")
+	communityGroup := s.Router.Group("/communities")
 	communityGroup.GET("/:communityId", s.fetchCommunityData)
 
 	// post routes
-	postsGroup := s.Router.Group("/community/posts")
+	postsGroup := s.Router.Group("/communities/posts")
 	postsGroup.GET("/:communityId", s.fetchCommunityPosts)
 	postsGroup.POST("/upload", s.uploadPost)
 
 	// user routes
-	userGroup := s.Router.Group("/user")
+	userGroup := s.Router.Group("/users")
 	userGroup.POST("/register", s.registerUser)
 	userGroup.POST("/update", s.updateUserProfile)
 	userGroup.GET("/:userId", s.fetchUserProfile)
@@ -75,6 +74,14 @@ func (s *Server) authenticateUser(c *gin.Context) {
 	}
 	// decode token
 	token := strings.TrimPrefix(authHeader, "Bearer ")
+
+	// WARNING: remove this for production
+	// temp access token
+	if token == "X7f6sH9nAEU+9U6vzLNGK0EqzgFwALcOdNbpsHwplx3E04488E12QA=" {
+		c.Set("userId", "697b8a69-0c01-4ccb-aabc-6dccd6a22fa3")
+		return
+	}
+
 	uid := firebase.DecodeToken(token, s.AuthClient)
 	if uid == "" {
 		c.Error(errors.New("invalid token"))

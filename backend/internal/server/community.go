@@ -2,11 +2,9 @@ package server
 
 import (
 	"bingdaily/backend/internal/database/communities"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
-
-	"fmt"
-	"strconv" // temporary until DB fixed
 )
 
 type Community struct {
@@ -18,24 +16,28 @@ type Community struct {
 	MemberCnt int `json:"memberCnt"`
 }
 
-var fakeComm *Community = &Community{
-	CommunityId: "fakecommunityid",
-	Name:        "Test Community",
-	Description: "This community is a test community",
-	Prompt:      "This is a test prompt",
-	MemberCnt:   67,
-}
-
 func (s *Server) fetchCommunityData(c *gin.Context) {
 	communityId := c.Param("communityId")
 
-	// temp code
-	converted, err := strconv.Atoi(communityId)
+	// check to see if community exists
+	comm, err := communities.GetCommunity(
+		s.DB,
+		communityId,
+	)
 	if err != nil {
-		fmt.Println("Invalid conversion")
+		fmt.Printf("Error Code: %v\n", err)
+		sendReponse(c, false, "invalid community id", nil)
+		return
 	}
 
-	communities.GetCommunity(s.DB, converted)
+	// if it does exist, send back to user
+	commResponse := &Community{
+		CommunityId: comm.CommunityID,
+		Name:        comm.Name,
+		Description: comm.Description,
+		Prompt:      comm.Prompt,
+		MemberCnt:   len(comm.Members),
+	}
 
-	sendReponse(c, true, "", fakeComm)
+	sendReponse(c, true, "", commResponse)
 }

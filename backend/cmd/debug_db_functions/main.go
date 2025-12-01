@@ -5,16 +5,17 @@ import (
 	"bingdaily/backend/internal/database/communities"
 	"bingdaily/backend/internal/database/dailies"
 	"bingdaily/backend/internal/database/users"
-	"database/sql"
+	"context"
+
 	"fmt"
 	"log"
 	"os"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func demoOperations(db *sql.DB) {
+func demoOperations(db *pgxpool.Pool) {
 	fmt.Println("\n🚀 Demo Operations:")
 
 	// Create a test community
@@ -28,6 +29,15 @@ func demoOperations(db *sql.DB) {
 		log.Printf("Community creation failed: %v", err)
 	} else {
 		fmt.Printf("✅ Created community with ID: %s\n", communityID)
+	}
+
+	// Test GetCommunity
+	// Retrieve the community
+	community, err := communities.GetCommunity(db, communityID)
+	if err != nil {
+		log.Printf("Failed to get community: %v", err)
+	} else {
+		fmt.Printf("✅ Retreived community: %v\n", community)
 	}
 
 	// Register test users with unique emails
@@ -118,6 +128,7 @@ func demoOperations(db *sql.DB) {
 	}
 
 	fmt.Println("\n🎉 Demo completed successfully!")
+
 }
 
 func main() {
@@ -129,26 +140,42 @@ func main() {
 	fmt.Println("==================")
 
 	// Connect to database
-	dsn := os.Getenv("PG_DSN")
-	if dsn == "" {
-		log.Fatal("PG_DSN environment variable is not set")
-	}
-
-	db, err := sql.Open("pgx", dsn)
-	if err != nil {
-		log.Fatal("Unable to connect to database:", err)
-	}
-	defer db.Close()
+	db := database.InitializeDatabase()
 
 	// Test connection
-	if err := db.Ping(); err != nil {
+	if err := db.Ping(context.TODO()); err != nil {
 		log.Fatal("Failed to ping database:", err)
 	}
 	fmt.Println("✅ Connected to database!")
 
 	// Verify database structure
-	if err := database.VerifyDatabaseStructure(db); err != nil {
+	if err := VerifyDatabaseStructure(db); err != nil {
 		log.Fatal("❌ Database structure issue:", err)
 	}
 	demoOperations(db)
+}
+
+// VerifyDatabaseStructure checks all required tables exist
+func VerifyDatabaseStructure(db *pgxpool.Pool) error {
+	requiredTables := []string{"communities", "dailies", "users"}
+
+	for _, table := range requiredTables {
+		var exists bool
+		err := db.QueryRow(context.TODO(), `
+			SELECT EXISTS (
+				SELECT FROM information_schema.tables 
+				WHERE table_schema = 'public'
+				AND table_name = $1
+			)`, table).Scan(&exists)
+
+		if err != nil {
+			return fmt.Errorf("failed to check table %s: %v", table, err)
+		}
+
+		if !exists {
+			return fmt.Errorf("required table '%s' does not exist", table)
+		}
+		fmt.Printf("✅ Table '%s' exists\n", table)
+	}
+	return nil
 }
