@@ -2,10 +2,10 @@ package users
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -43,7 +43,7 @@ func Register(db *pgxpool.Pool, name, email, profilePicture string) (string, err
 	if err == nil {
 		// User already exists, return the existing ID
 		return existingID, nil
-	} else if err != sql.ErrNoRows {
+	} else if err != pgx.ErrNoRows {
 		// Some other error occurred
 		return "", err
 	}
