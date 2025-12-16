@@ -4,6 +4,7 @@ import (
 	"bingdaily/backend/internal/database/communities"
 	"bingdaily/backend/internal/database/dailies"
 	"bingdaily/backend/internal/storage"
+	"fmt"
 
 	"slices"
 	"time"
@@ -20,9 +21,12 @@ type Post struct {
 	TimePosted  time.Time `json:"timePosted"`
 }
 
+type FetchCommunityPostsResponse struct {
+	Posts []*Post `json:"posts"`
+}
+
 type CreatePostRequest struct {
 	CommunityId string `json:"communityId"`
-	UserId      string `json:"userId"`
 	Caption     string `json:"caption"`
 }
 
@@ -81,12 +85,10 @@ func (s *Server) fetchCommunityPosts(c *gin.Context) {
 		}
 		posts = append(posts, res)
 	}
-	sendResponse(
-		c,
-		true,
-		"posts fetched",
-		posts,
-	)
+	res := &FetchCommunityPostsResponse{
+		Posts: posts,
+	}
+	sendResponse(c, true, fmt.Sprintf("fetched %d posts", len(posts)), res)
 }
 
 // TODO: right now there are 3 calls to DB, minimize # of calls
@@ -96,13 +98,13 @@ func (s *Server) uploadPost(c *gin.Context) {
 
 	// check if valid request
 	err := c.ShouldBind(&req)
-	if err != nil || userId != req.UserId {
+	if err != nil {
 		sendResponse(c, false, "invalid request body", nil)
 		return
 	}
 
 	// check if user in community
-	in, err := communities.UserInCommunity(s.DB, req.CommunityId, req.UserId)
+	in, err := communities.UserInCommunity(s.DB, req.CommunityId, userId)
 	if !in {
 		sendResponse(c, false, "unauthorized operation", nil)
 		return

@@ -1,84 +1,114 @@
 # Backend API
-The backend is a REST API that will communicate with the client. 
-For the POST endpoints, make sure to include the following header in your HTTP request:
+
+## Notes
+### Post Request
+
+The backend follows a REST API format. 
+For POST endpoints, make sure to include the following header in your HTTP request:
 ```
 Content-Type: application/json
 ```
 *This is not really necessary, but good practice!*
 
+### Responses
+All endpoints will send back a response in this format:
+```json
+{
+    "status": "success" | "fail",
+    "message": string,
+    "data": {},
+}
+```
+
+`status` denotes if the request was successful. 
+
+`message` includes any debug information regarding the prior request. This is useful to display/check to troubleshoot any failed requests.
+
+`data` contains any relevant data returned by the server for the request. The specific structure of this field will be detailed in the docs (if applicable).
+
+### Media Upload/Download
+
+The backend uses S3 to store media (images, videos, etc.). To protect the privacy of users, some media operations require authentication. A presigned upload/download url will be sent by the backend for these operations.
+
+For upload operations, a `PUT` request must be sent to the url.
+
+Right now the urls are set to expire in **10 minutes**, but that is subject to change. There also isn't any functionality to extend the duration of a url. 
+
+
 ## Authentication
-Some API calls will require authentication to be completed. These requests will be marked `authorization required` in this documentation. To include authentication, add the following header to your HTTP request:
+Some API calls will require authentication. These requests will be marked `authorization required`. To include authentication, add the following header to your HTTP request:
 ```
 Authorization: Bearer <token>
 ```
+
+During authentication, the server will automatically retrieve the current user based on the contents of the token. All operations performed will be executed on behalf of this user.
 
 ## User
 
 ### Register User
 `/users/register` | `POST` | `authorization required`
 
-For a user to be registered in the backend, they first need to register. The registration request should be formatted like this:
+Before making any requests, the user first needs to register. A registration request should look like this:
 
 #### Request
-```
+```json
 {
-    "userId": string, 
     "email": string,
     "username": string,
-    "joinDate": string*,
+    "updatePicture": bool,
 }
 ```
-\* The `joinDate` field should follow ISO 8601 (YYYY-MM-DD).
+
+*Note, the email must be the same as the one used by firebase!*
 
 #### Response
-```
-{
-    "status": "success" | "fail",
-    "message": string
+```json
+"data": {
+    "uploadUrl" : string*,
 }
 ```
+
+\* `uploadUrl` is only sent when the `updatePicture` field is set to `true`. It contains a presigned `PUT` url that can be used to upload media.
+
 
 ### Update User Profile
 `/users/update` | `POST` | `authorization required`
 
-To update a user's profile, a request should be sent like this:
+To update a user's profile, send a request detailing which properties need to be modified:
 
 #### Request
-```
+```json
 {
-    // cant modify
-    "userId": string, 
-
-    // can modify*
     "username": string*,
+    "updatePicture": bool*,
 }
 ```
-\* Only include fields that you want to modify 
+\* All fields are optional, only include what needs to be changed.
 
 #### Response
-```
-{
-    "status": "success" | "fail",
-    "message": string
+```json
+"data": {
+    "uploadUrl": string*,
 }
 ```
+
+\* Only sent back if `updatePicture` is set to `true`.
+
+*Note: there is a chance that a request may only be partially fulfilled. `success` will be set to `false` upon any operation failing. Check `message` for more details.*
 
 ### Retrieve User Profile Data
 
 `/users/<userId>` | `GET` | `authorization required`
 
 #### Response
-```
-{
-    "status": "success" | "fail",
-    "message": string,
-
-    "data": UserObject*
+```json
+"data": {
+    "users": UserObject[]*,
 }
 ```
 
-* The `UserObject` structure will follow this format:
-```
+\* `UserObject` will follow this format:
+```json
 {
     "userId": string,
     "email": string,
@@ -87,8 +117,7 @@ To update a user's profile, a request should be sent like this:
     "communities": string[]**,
 }
 ```
-\* `joinDate` will be in `YYYY-MM-DD` format.
-
+\* The `joinDate` field follows ISO 8601 (YYYY-MM-DD).
 \*\* `communities` will be an array of `communityIds`.
 
 
@@ -99,22 +128,18 @@ To update a user's profile, a request should be sent like this:
 `/communities/<communityId>` | `GET` | `authorization required`
 
 #### Response
-```
-{
-    "status": "success" | "fail",
-    "message": string,
-
-    "data": CommunityObject*
+```json
+"data": {
+    "community": CommunityObject*,
 }
 ```
-\* The `CommunityObject` structure will follow this format:
-```
+\* `CommunityObject` will follow this format:
+```json
 {
     "communityId": string,
     "name": string,
-    "description': string,
+    "description": string,
     "prompt": string,
-
     "memberCnt": int
 }
 ```
@@ -125,53 +150,42 @@ To update a user's profile, a request should be sent like this:
 This endpoint is to retrieve all the posts from a community. This request will only be fulfilled if the user requesting the data has already posted within that community.
 
 #### Response
-```
-{
-    "status": "success" | "fail",
-    "message": string,
-
-    "data": PostObject[]*
+```json
+"data": {
+    "posts": PostObject[]*,
 }
 ```
 
-\* The `PostObject` structure will follow this format:
-```
+\* `PostObject` will follow this format:
+```json
 {
     "postId": string,
     "communityId": string,
     "userId": string,
-    
     "caption": string,
-    "timePosted": string, // will follow YYYY-DD-MMTHH:MM:SS (ISO 8601)
-    "imageUrl": string // will be URL to s3 object
+    "timePosted": string, // follows YYYY-DD-MMTHH:MM:SS (ISO 8601)
+    "imageUrl": string*,
 }
 ```
+\* `imageUrl` is a signed URL that can be used to download/access media
 
 ### Upload Post to Community
 `/communities/posts/upload` | `POST` | `authorization required`
 
-Can only upload 1 post per prompt, so the database will check to see if the posting user has not posted yet.
+A user can only have 1 post per community. The database will check to see if the user has posted yet.
 
 #### Request
-```
+```json
 {
     "communityId": string,
-    "userId": string,
-
     "caption": string,
 }
 ```
 
 #### Response
-```
-{
-    "status": "success" | "fail",
-    "message": string
-    // if image upload required, they can upload from here
-    "data": {
-        "postId": string, // id of the recently created post
-        "uploadUrl": string // link to upload media
-    }
+```json
+"data": {
+    "postId": string, // newly created post id
+    "uploadUrl": string, // presigned PUT url
 }
 ```
-

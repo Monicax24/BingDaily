@@ -16,6 +16,10 @@ type Community struct {
 	MemberCnt int `json:"memberCnt"`
 }
 
+type FetchCommunityDataResponse struct {
+	Community *Community `json:"community"`
+}
+
 func (s *Server) fetchCommunityData(c *gin.Context) {
 	communityId := c.Param("communityId")
 
@@ -38,5 +42,8 @@ func (s *Server) fetchCommunityData(c *gin.Context) {
 		MemberCnt:   len(comm.Members),
 	}
 
-	sendResponse(c, true, fmt.Sprintf("retreived %s", communityId), commResponse)
+	res := &FetchCommunityDataResponse{
+		Community: commResponse,
+	}
+	sendResponse(c, true, fmt.Sprintf("retreived %s", communityId), res)
 }
