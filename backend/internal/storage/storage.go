@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/google/uuid"
 )
 
+// TODO: find secure but efficient timeframe for duration
 const (
 	UPLOAD_TIME   time.Duration = 24 * time.Hour
 	DOWNLOAD_TIME time.Duration = 24 * time.Hour
@@ -35,6 +38,10 @@ func InitializeStorage() *Storage {
 	}
 }
 
+func CreatePictureId() string {
+	return uuid.New().String()
+}
+
 func (s *Storage) GenerateUploadURL(bucket string, key string) (string, error) {
 	req := &s3.PutObjectInput{
 		Bucket: &bucket,
@@ -54,9 +61,12 @@ func (s *Storage) GenerateUploadURL(bucket string, key string) (string, error) {
 }
 
 func (s *Storage) GenerateDownloadURL(bucket string, key string) (string, error) {
+	// TODO: right now assuming image/jpeg but analyze if this is best decision
 	req := &s3.GetObjectInput{
-		Bucket: &bucket,
-		Key:    &key,
+		Bucket:                     &bucket,
+		Key:                        &key,
+		ResponseContentType:        aws.String("image/jpeg"),
+		ResponseContentDisposition: aws.String("inline"),
 	}
 
 	url, err := s.PresignClient.PresignGetObject(
@@ -68,5 +78,6 @@ func (s *Storage) GenerateDownloadURL(bucket string, key string) (string, error)
 	if err != nil {
 		return "", err
 	}
+
 	return url.URL, nil
 }

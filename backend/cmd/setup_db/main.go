@@ -59,7 +59,7 @@ func main() {
 		`CREATE TABLE dailies (
 			post_id VARCHAR(50) PRIMARY KEY,
 			community_id VARCHAR(50) REFERENCES communities(community_id) ON DELETE CASCADE,
-			picture TEXT NOT NULL,
+			picture TEXT,
 			caption TEXT,
 			author VARCHAR(50) REFERENCES users(user_id) ON DELETE CASCADE,
 			time_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -86,11 +86,12 @@ func main() {
 
 	fmt.Println("\n🎉 Database setup complete! All tables created with string IDs.")
 
+	// WARNING: remove this after testing
 	// default community
 	communities.CreateCommunity(
 		db,
 		"ACM Project Team 4",
-		"nopicture.jpg",
+		"",
 		"default community for testing",
 		"09:00",
 		"Upload a cool photo!",
@@ -101,13 +102,12 @@ func main() {
 		WHERE name = 'ACM Project Team 4'`,
 	)
 
-	// WARNING: remove this after testing
 	// default user
 	users.Register(
 		db,
 		"testuser",
 		"test@test.com",
-		"nopicture.jpg",
+		"",
 	)
 	// set id for default user
 	db.Exec(context.TODO(),
@@ -115,4 +115,7 @@ func main() {
 		SET user_id = '697b8a69-0c01-4ccb-aabc-6dccd6a22fa3'
 		WHERE name = 'testuser'`,
 	)
+
+	// add default user to default community
+	communities.JoinCommunity(db, "697b8a69-0c01-4ccb-aabc-6dccd6a22fa3", "6a6a671e-2543-4fad-ba82-dedc37338f14")
 }

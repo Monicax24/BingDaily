@@ -143,7 +143,7 @@ This endpoint is to retrieve all the posts from a community. This request will o
     
     "caption": string,
     "timePosted": string, // will follow YYYY-DD-MMTHH:MM:SS (ISO 8601)
-    "image": string // will be URL to s3 object
+    "imageUrl": string // will be URL to s3 object
 }
 ```
 
@@ -170,7 +170,7 @@ Can only upload 1 post per prompt, so the database will check to see if the post
     // if image upload required, they can upload from here
     "data": {
         "postId": string, // id of the recently created post
-        "upload": string // link to upload media
+        "uploadUrl": string // link to upload media
     }
 }
 ```

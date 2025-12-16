@@ -1,51 +1,146 @@
 package server
 
 import (
-	"fmt"
+	"bingdaily/backend/internal/database/communities"
+	"bingdaily/backend/internal/database/dailies"
+	"bingdaily/backend/internal/storage"
+
+	"slices"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Post struct {
-	PostId      string `json:"postId"`
+	PostId      string    `json:"postId"`
+	CommunityId string    `json:"communityId"`
+	UserId      string    `json:"author"`
+	Caption     string    `json:"caption"`
+	ImageUrl    string    `json:"imageUrl"`
+	TimePosted  time.Time `json:"timePosted"`
+}
+
+type CreatePostRequest struct {
 	CommunityId string `json:"communityId"`
-	UserId      string `json:"author"`
-
-	Caption    string    `json:"caption"`
-	TimePosted time.Time `json:"timePosted"`
+	UserId      string `json:"userId"`
+	Caption     string `json:"caption"`
 }
 
-var fakePost1 = &Post{
-	PostId:      "fakepost1id",
-	CommunityId: "fakecommunityid",
-	UserId:      "fakeuserid",
-
-	Caption:    "This is a test caption for test post 1!",
-	TimePosted: time.Now(),
-}
-
-var fakePost2 = &Post{
-	PostId:      "fakepost2id",
-	CommunityId: "fakecommunityid",
-	UserId:      "fakeuserid",
-
-	Caption:    "This is a test caption for test post 2!",
-	TimePosted: time.Now(),
+type CreatePostResponse struct {
+	PostId    string `json:"postId"`
+	UploadUrl string `json:"uploadUrl"`
 }
 
 func (s *Server) fetchCommunityPosts(c *gin.Context) {
 	communityId := c.Param("communityId")
+	userId := c.Value("userId").(string)
 
-	arr := [2]*Post{fakePost1, fakePost2}
-	sendReponse(
+	// check to see if community exists
+	comm, err := communities.GetCommunity(
+		s.DB,
+		communityId,
+	)
+	if err != nil {
+		sendResponse(c, false, "invalid community id", nil)
+		return
+	}
+
+	// check to see if user in community
+	if !slices.Contains(comm.Members, userId) {
+		sendResponse(c, false, "unauthorized operation", nil)
+		return
+	}
+
+	// retrieve all the posts
+	dlies, err := dailies.FetchDailiesFromCommunity(s.DB, communityId)
+	if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+	var posts []*Post
+	for _, daily := range dlies {
+		// add image URL if it exists
+		imageUrl := ""
+		if daily.Picture != "" {
+			url, err := s.Storage.GenerateDownloadURL("bingdaily-pictures", daily.Picture)
+			// error getting picture so send placeholder
+			// TODO: send local placeholder, not publicy-hosted
+			if err != nil {
+				imageUrl = "https://www.setra.com/hubfs/Sajni/crc_error.jpg"
+			} else {
+				imageUrl = url
+			}
+		}
+		res := &Post{
+			PostId:      daily.PostID,
+			CommunityId: daily.CommunityID,
+			UserId:      daily.Author,
+			Caption:     daily.Caption,
+			TimePosted:  daily.TimePosted,
+			ImageUrl:    imageUrl,
+		}
+		posts = append(posts, res)
+	}
+	sendResponse(
 		c,
 		true,
-		fmt.Sprintf("Retrieved posts for %s successfully!", communityId),
-		arr,
+		"posts fetched",
+		posts,
 	)
 }
 
+// TODO: right now there are 3 calls to DB, minimize # of calls
 func (s *Server) uploadPost(c *gin.Context) {
-	sendReponse(c, true, "Post uploaded successfully", nil)
+	req := &CreatePostRequest{}
+	userId := c.Value("userId").(string)
+
+	// check if valid request
+	err := c.ShouldBind(&req)
+	if err != nil || userId != req.UserId {
+		sendResponse(c, false, "invalid request body", nil)
+		return
+	}
+
+	// check if user in community
+	in, err := communities.UserInCommunity(s.DB, req.CommunityId, req.UserId)
+	if !in {
+		sendResponse(c, false, "unauthorized operation", nil)
+		return
+	} else if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+
+	// check if user has posted before
+	posted, err := dailies.HasPostedToday(s.DB, userId, req.CommunityId)
+	if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	} else if posted {
+		sendResponse(c, false, "already posted", nil)
+		return
+	}
+
+	// TODO: s3 + sql operations can be done async?
+	// create picture
+	pictureId := storage.CreatePictureId()
+	uploadUrl, err := s.Storage.GenerateUploadURL("bingdaily-pictures", pictureId)
+	// add to db
+	dailyId, err1 := dailies.CreateDaily(
+		s.DB,
+		req.CommunityId,
+		pictureId,
+		req.Caption,
+		userId,
+	)
+	if err != nil || err1 != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+
+	res := &CreatePostResponse{
+		PostId:    dailyId,
+		UploadUrl: uploadUrl,
+	}
+	sendResponse(c, true, "post uploaded", res)
 }

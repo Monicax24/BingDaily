@@ -26,29 +26,29 @@ var fakeUser *User = &User{
 }
 
 func (s *Server) registerUser(c *gin.Context) {
-	sendReponse(
+	sendResponse(
 		c,
 		true,
-		"User registration success!",
+		"user registered",
 		nil,
 	)
 }
 
 func (s *Server) updateUserProfile(c *gin.Context) {
-	sendReponse(
+	sendResponse(
 		c,
 		true,
-		"User profile update success!",
+		"profile updated",
 		nil,
 	)
 }
 
 func (s *Server) fetchUserProfile(c *gin.Context) {
 	userId := c.Param("userId")
-	sendReponse(
+	sendResponse(
 		c,
 		true,
-		fmt.Sprintf("Retrieved user %s successfully!", userId),
+		fmt.Sprintf("retrieved %s", userId),
 		fakeUser,
 	)
 }

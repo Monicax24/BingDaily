@@ -56,11 +56,11 @@ func demoOperations(db *pgxpool.Pool) {
 	}
 
 	// Test in Community
-	in, err := communities.InCommunity(db, communityID, user1)
+	in, err := communities.UserInCommunity(db, communityID, user1)
 	if err != nil {
-		log.Printf("InCommunity check failed: %v", err)
+		log.Printf("UserInCommunity check failed: %v", err)
 	} else {
-		fmt.Printf("✅ InCommunity check result: %v\n", in)
+		fmt.Printf("✅ UserInCommunity check result: %v\n", in)
 	}
 
 	// Users join community
@@ -79,15 +79,15 @@ func demoOperations(db *pgxpool.Pool) {
 	}
 
 	// Test in Community
-	in, err = communities.InCommunity(db, communityID, user1)
+	in, err = communities.UserInCommunity(db, communityID, user1)
 	if err != nil {
-		log.Printf("InCommunity check failed: %v", err)
+		log.Printf("UserInCommunity check failed: %v", err)
 	} else {
-		fmt.Printf("✅ InCommunity check result: %v\n", in)
+		fmt.Printf("✅ UserInCommunity check result: %v\n", in)
 	}
 
 	// Create a daily post
-	dailyID, err := dailies.CreateDaily(db, communityID, "sunset.jpg", "Beautiful sunset today!", user1)
+	dailyID, err := dailies.CreateDaily(db, communityID, "", "Beautiful sunset today!", user1)
 	if err != nil {
 		log.Printf("Daily creation failed: %v", err)
 	} else {
@@ -119,7 +119,7 @@ func demoOperations(db *pgxpool.Pool) {
 	}
 
 	// Create another daily to test bulk deletion
-	dailyID2, err := dailies.CreateDaily(db, communityID, "mountain.jpg", "Great hike today!", user1)
+	dailyID2, err := dailies.CreateDaily(db, communityID, "", "Great hike today!", user1)
 	if err != nil {
 		log.Printf("Second daily creation failed: %v", err)
 	} else {

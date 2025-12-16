@@ -6,21 +6,38 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Daily struct {
-	PostID      string    `json:"post_id"`
-	CommunityID string    `json:"community_id"`
+	PostID      string    `json:"post_id" db:"post_id"`
+	CommunityID string    `json:"community_id" db:"community_id"`
 	Picture     string    `json:"picture"`
 	Caption     string    `json:"caption"`
 	Author      string    `json:"author"`
-	TimePosted  time.Time `json:"time_posted"`
+	TimePosted  time.Time `json:"time_posted" db:"time_posted"`
 	Likes       []string  `json:"likes"`
 }
 
+// Fetch all dailies from certain community
+func FetchDailiesFromCommunity(db *pgxpool.Pool, communityID string) ([]Daily, error) {
+	rows, err := db.Query(
+		context.TODO(),
+		`SELECT * FROM dailies WHERE community_id = $1`,
+		communityID)
+	if err != nil {
+		return nil, err
+	}
+	dailies, err := pgx.CollectRows(rows, pgx.RowToStructByName[Daily])
+	if err != nil {
+		return nil, err
+	}
+	return dailies, nil
+}
+
 // Create a new daily
-func CreateDaily(db *pgxpool.Pool, communityID string, picturePath, caption string, author string) (string, error) {
+func CreateDaily(db *pgxpool.Pool, communityID string, pictureID, caption string, author string) (string, error) {
 	var postID string
 
 	// Verify the author exists
@@ -40,8 +57,7 @@ func CreateDaily(db *pgxpool.Pool, communityID string, picturePath, caption stri
 	_, err = db.Exec(context.TODO(), `
 		INSERT INTO dailies (post_id, community_id, picture, caption, author, time_posted, likes) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		postID, communityID, picturePath, caption, author, time.Now(), "{}")
-
+		postID, communityID, pictureID, caption, author, time.Now(), "{}")
 	if err == nil {
 		// Add daily to community's posts array
 		_, err = db.Exec(context.TODO(), `
@@ -50,7 +66,6 @@ func CreateDaily(db *pgxpool.Pool, communityID string, picturePath, caption stri
 			WHERE community_id = $2`,
 			postID, communityID)
 	}
-
 	return postID, err
 }
 
@@ -103,6 +118,7 @@ func HasPostedToday(db *pgxpool.Pool, userID, communityID string) (bool, error) 
 		userID, communityID).Scan(&count)
 	return count > 0, err
 }
+
 func DeleteDaily(db *pgxpool.Pool, postID string) error {
 	tx, err := db.Begin(context.TODO())
 	if err != nil {

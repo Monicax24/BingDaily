@@ -25,7 +25,6 @@ func (s *Server) fetchCommunityData(c *gin.Context) {
 		communityId,
 	)
 	if err != nil {
-		fmt.Printf("Error Code: %v\n", err)
 		sendResponse(c, false, "invalid community id", nil)
 		return
 	}
