@@ -20,7 +20,7 @@ type Server struct {
 }
 
 // Helper function for sending server responses
-func sendReponse(c *gin.Context, status bool, message string, data interface{}) {
+func sendResponse(c *gin.Context, status bool, message string, data interface{}) {
 	response := gin.H{
 		"status":  "fail",
 		"message": nil,
@@ -81,6 +81,7 @@ func (s *Server) authenticateUser(c *gin.Context) {
 		c.Set("userId", "697b8a69-0c01-4ccb-aabc-6dccd6a22fa3")
 		return
 	}
+	// end test code
 
 	uid := firebase.DecodeToken(token, s.AuthClient)
 	if uid == "" {
@@ -88,7 +89,6 @@ func (s *Server) authenticateUser(c *gin.Context) {
 		return
 	}
 	c.Set("userId", uid)
-
 }
 
 // TODO: come up with better error handling scheme (panics, dont leak internal, etc.)
@@ -98,7 +98,7 @@ func (s *Server) errorHandling(c *gin.Context) {
 	// if there was an error during auth (if there was auth)
 	if c.Errors.Last() != nil {
 		err := c.Errors.Last().Error()
-		sendReponse(c, false, err, nil)
+		sendResponse(c, false, err, nil)
 		c.Abort()
 		return
 	}
@@ -109,7 +109,7 @@ func (s *Server) errorHandling(c *gin.Context) {
 	// if there was an error during processing
 	if c.Errors.Last() != nil {
 		err := c.Errors.Last().Error()
-		sendReponse(c, false, err, nil)
+		sendResponse(c, false, err, nil)
 		c.Abort()
 		return
 	}

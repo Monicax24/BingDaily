@@ -118,6 +118,22 @@ func demoOperations(db *pgxpool.Pool) {
 		fmt.Printf("✅ User %s liked daily %s\n", user2, dailyID)
 	}
 
+	// Create another daily to test bulk deletion
+	dailyID2, err := dailies.CreateDaily(db, communityID, "mountain.jpg", "Great hike today!", user1)
+	if err != nil {
+		log.Printf("Second daily creation failed: %v", err)
+	} else {
+		fmt.Printf("✅ Created second daily with ID: %s\n", dailyID2)
+	}
+
+	// Fetch all daily posts
+	dlies, err := dailies.FetchDailiesFromCommunity(db, communityID)
+	if err != nil {
+		log.Printf("Fetching dailies from community failed: %v", err)
+	} else {
+		fmt.Printf("✅ Dailies fetched: %v\n", dlies)
+	}
+
 	// Demo: Delete the daily post
 	fmt.Println("\n🗑️ Testing delete operations...")
 	err = dailies.DeleteDaily(db, dailyID)
@@ -135,16 +151,7 @@ func demoOperations(db *pgxpool.Pool) {
 		fmt.Printf("❌ Daily %s still exists after deletion\n", dailyID)
 	}
 
-	// Create another daily to test bulk deletion
-	dailyID2, err := dailies.CreateDaily(db, communityID, "mountain.jpg", "Great hike today!", user1)
-	if err != nil {
-		log.Printf("Second daily creation failed: %v", err)
-	} else {
-		fmt.Printf("✅ Created second daily with ID: %s\n", dailyID2)
-	}
-
 	fmt.Println("\n🎉 Demo completed successfully!")
-
 }
 
 func main() {
