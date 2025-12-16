@@ -55,6 +55,14 @@ func demoOperations(db *pgxpool.Pool) {
 		fmt.Printf("✅ Registered user Bob with ID: %s\n", user2)
 	}
 
+	// Test in Community
+	in, err := communities.InCommunity(db, communityID, user1)
+	if err != nil {
+		log.Printf("InCommunity check failed: %v", err)
+	} else {
+		fmt.Printf("✅ InCommunity check result: %v\n", in)
+	}
+
 	// Users join community
 	err = communities.JoinCommunity(db, user1, communityID)
 	if err != nil {
@@ -68,6 +76,14 @@ func demoOperations(db *pgxpool.Pool) {
 		log.Printf("Join community failed: %v", err)
 	} else {
 		fmt.Printf("✅ User %s joined community %s\n", user2, communityID)
+	}
+
+	// Test in Community
+	in, err = communities.InCommunity(db, communityID, user1)
+	if err != nil {
+		log.Printf("InCommunity check failed: %v", err)
+	} else {
+		fmt.Printf("✅ InCommunity check result: %v\n", in)
 	}
 
 	// Create a daily post

@@ -48,6 +48,24 @@ func GetCommunity(db *pgxpool.Pool, communityID string) (*Community, error) {
 	return &community, nil
 }
 
+// Check if user is in a certain community
+func InCommunity(db *pgxpool.Pool, communityId string, userId string) (bool, error) {
+	var in bool
+	err := db.QueryRow(context.TODO(), `
+		SELECT EXISTS (
+			SELECT 1
+			FROM users
+			WHERE user_id = $1 AND $2 = ANY( communities )
+		)`,
+		userId, communityId).Scan(&in)
+
+	if err == nil {
+		return in, nil
+	}
+
+	return false, err
+}
+
 // Join a community
 func JoinCommunity(db *pgxpool.Pool, userID, communityID string) error {
 	_, err := db.Exec(context.TODO(), `
