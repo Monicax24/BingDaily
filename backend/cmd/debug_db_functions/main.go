@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,20 +19,21 @@ func demoOperations(db *pgxpool.Pool) {
 	fmt.Println("\n🚀 Demo Operations:")
 
 	// Create a test community
-	communityID, err := communities.CreateCommunity(db,
+	communityID := uuid.New().String()
+	success, err := communities.CreateCommunity(db,
+		communityID,
 		"Daily Photos",                  // name
-		"community1.jpg",                // picture
+		"",                              // picture
 		"Daily photo sharing community", // description
 		"09:00",                         // postTime
 		"Share your daily photo!")       // defaultPrompt
 	if err != nil {
-		log.Printf("Community creation failed: %v", err)
+		log.Printf("Error creating community: %v", err)
 	} else {
-		fmt.Printf("✅ Created community with ID: %s\n", communityID)
+		fmt.Printf("✅ Status creating community (%s): %v\n", communityID, success)
 	}
 
 	// Test GetCommunity
-	// Retrieve the community
 	community, err := communities.GetCommunity(db, communityID)
 	if err != nil {
 		log.Printf("Failed to get community: %v", err)
@@ -41,18 +42,21 @@ func demoOperations(db *pgxpool.Pool) {
 	}
 
 	// Register test users with unique emails
-	user1, err := users.Register(db, "Alice", fmt.Sprintf("alice%d@bing.com", time.Now().Unix()), "alice.jpg")
+	// user 1
+	user1 := uuid.New().String()
+	success, err = users.Register(db, user1, "Alice", "alice@bing.com", "")
 	if err != nil {
-		log.Printf("User registration failed: %v", err)
+		log.Printf("Error during User Registration: %v", err)
 	} else {
-		fmt.Printf("✅ Registered user Alice with ID: %s\n", user1)
+		fmt.Printf("✅ Status registering Alice (%s): %v\n", user1, success)
 	}
-
-	user2, err := users.Register(db, "Bob", fmt.Sprintf("bob%d@bing.com", time.Now().Unix()+1), "bob.jpg")
+	// user 2
+	user2 := uuid.New().String()
+	success, err = users.Register(db, user2, "Bob", "bob@bing.com", "")
 	if err != nil {
-		log.Printf("User registration failed: %v", err)
+		log.Printf("Error during User Registration: %v", err)
 	} else {
-		fmt.Printf("✅ Registered user Bob with ID: %s\n", user2)
+		fmt.Printf("✅ Status registering Bob (%s): %v\n", user2, success)
 	}
 
 	// Test in Community
@@ -60,7 +64,7 @@ func demoOperations(db *pgxpool.Pool) {
 	if err != nil {
 		log.Printf("UserInCommunity check failed: %v", err)
 	} else {
-		fmt.Printf("✅ UserInCommunity check result: %v\n", in)
+		fmt.Printf("✅ UserInCommunity check result before joining: %v\n", in)
 	}
 
 	// Users join community
@@ -83,7 +87,7 @@ func demoOperations(db *pgxpool.Pool) {
 	if err != nil {
 		log.Printf("UserInCommunity check failed: %v", err)
 	} else {
-		fmt.Printf("✅ UserInCommunity check result: %v\n", in)
+		fmt.Printf("✅ UserInCommunity check result after joining: %v\n", in)
 	}
 
 	// Create a daily post
@@ -134,6 +138,14 @@ func demoOperations(db *pgxpool.Pool) {
 		fmt.Printf("✅ Dailies fetched: %v\n", dlies)
 	}
 
+	// Check getting non-existent user
+	fakeUser, err := users.GetUser(db, "not-a-real-user-id")
+	if err != nil {
+		fmt.Printf("Fetching nonexistent user failed: %v\n", err)
+	} else {
+		fmt.Printf("Value of nonexistent user: %v\n", fakeUser)
+	}
+
 	// Demo: Delete the daily post
 	fmt.Println("\n🗑️ Testing delete operations...")
 	err = dailies.DeleteDaily(db, dailyID)
@@ -151,7 +163,6 @@ func demoOperations(db *pgxpool.Pool) {
 		fmt.Printf("❌ Daily %s still exists after deletion\n", dailyID)
 	}
 
-	fmt.Println("\n🎉 Demo completed successfully!")
 }
 
 func main() {
@@ -175,7 +186,10 @@ func main() {
 	if err := VerifyDatabaseStructure(db); err != nil {
 		log.Fatal("❌ Database structure issue:", err)
 	}
+
 	demoOperations(db)
+
+	fmt.Println("\n🎉 Demo completed successfully!")
 }
 
 // VerifyDatabaseStructure checks all required tables exist

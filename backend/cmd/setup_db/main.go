@@ -88,11 +88,13 @@ func main() {
 
 	// WARNING: remove this after testing
 	// default community
+	commId := "6a6a671e-2543-4fad-ba82-dedc37338f14"
 	communities.CreateCommunity(
 		db,
-		"ACM Project Team 4",
+		commId,
+		"Default Community",
 		"",
-		"default community for testing",
+		"The default community for testing!",
 		"09:00",
 		"Upload a cool photo!",
 	)
@@ -103,19 +105,15 @@ func main() {
 	)
 
 	// default user
+	userId := "697b8a69-0c01-4ccb-aabc-6dccd6a22fa3"
 	users.Register(
 		db,
+		userId,
 		"testuser",
 		"test@test.com",
 		"",
 	)
-	// set id for default user
-	db.Exec(context.TODO(),
-		`UPDATE public.users
-		SET user_id = '697b8a69-0c01-4ccb-aabc-6dccd6a22fa3'
-		WHERE name = 'testuser'`,
-	)
 
 	// add default user to default community
-	communities.JoinCommunity(db, "697b8a69-0c01-4ccb-aabc-6dccd6a22fa3", "6a6a671e-2543-4fad-ba82-dedc37338f14")
+	communities.JoinCommunity(db, userId, commId)
 }

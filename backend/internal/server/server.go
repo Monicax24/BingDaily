@@ -83,7 +83,7 @@ func (s *Server) authenticateUser(c *gin.Context) {
 	}
 	// end test code
 
-	uid := firebase.DecodeToken(token, s.AuthClient)
+	uid := firebase.DecodeToken(s.AuthClient, token)
 	if uid == "" {
 		c.Error(errors.New("invalid token"))
 		return
