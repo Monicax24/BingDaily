@@ -13,8 +13,10 @@ import (
 
 // TODO: find secure but efficient timeframe for duration
 const (
-	UPLOAD_TIME   time.Duration = 24 * time.Hour
-	DOWNLOAD_TIME time.Duration = 24 * time.Hour
+	UPLOAD_TIME    time.Duration = 24 * time.Hour
+	DOWNLOAD_TIME  time.Duration = 24 * time.Hour
+	POST_PICTURES  string        = "bingdaily-pictures"
+	PROFILE_PHOTOS string        = "bingdaily-profile-photos"
 )
 
 type Storage struct {

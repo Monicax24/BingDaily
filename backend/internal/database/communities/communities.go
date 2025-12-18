@@ -3,7 +3,6 @@ package communities
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,32 +18,29 @@ type Community struct {
 }
 
 // Create a new community
-func CreateCommunity(db *pgxpool.Pool, name, picture, description, postTime, prompt string) (string, error) {
-	// Generate a unique community ID
-	communityID := uuid.New().String()
-
+func CreateCommunity(db *pgxpool.Pool, communityID, name, picture, description, postTime, prompt string) (bool, error) {
 	_, err := db.Exec(context.TODO(), `
 		INSERT INTO communities (community_id, name, picture, description, members, posts, post_time, prompt) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		communityID, name, picture, description, "{}", "{}", postTime, prompt)
-	return communityID, err
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // Get community by ID
 func GetCommunity(db *pgxpool.Pool, communityID string) (*Community, error) {
 	var community Community
-
 	err := db.QueryRow(context.TODO(),
 		`SELECT community_id, picture, description, members, posts, post_time, prompt, name
 		FROM communities
 		WHERE community_id = $1`,
 		communityID).Scan(&community.CommunityID, &community.Picture, &community.Description,
 		&community.Members, &community.Posts, &community.PostTime, &community.Prompt, &community.Name)
-
 	if err != nil {
 		return nil, err
 	}
-
 	return &community, nil
 }
 

@@ -96,14 +96,14 @@ To update a user's profile, send a request detailing which properties need to be
 
 *Note: there is a chance that a request may only be partially fulfilled. `success` will be set to `false` upon any operation failing. Check `message` for more details.*
 
-### Retrieve User Profile Data
+### Retrieve Current User Profile Data
 
-`/users/<userId>` | `GET` | `authorization required`
+`/users/profile` | `GET` | `authorization required`
 
 #### Response
 ```json
 "data": {
-    "users": UserObject[]*,
+    "user": UserObject*,
 }
 ```
 
@@ -114,11 +114,13 @@ To update a user's profile, send a request detailing which properties need to be
     "email": string,
     "username": string,
     "joinDate": string*,
+    "profilePicture": string,
     "communities": string[]**,
 }
 ```
 \* The `joinDate` field follows ISO 8601 (YYYY-MM-DD).
-\*\* `communities` will be an array of `communityIds`.
+
+\*\* `communities` will be an array of `communityId` strings.
 
 
 ## Community

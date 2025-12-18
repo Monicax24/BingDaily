@@ -26,13 +26,13 @@ type FetchCommunityPostsResponse struct {
 }
 
 type CreatePostRequest struct {
-	CommunityId string `json:"communityId"`
-	Caption     string `json:"caption"`
+	CommunityId string `json:"communityId" binding:"required"`
+	Caption     string `json:"caption" binding:"required"`
 }
 
 type CreatePostResponse struct {
-	PostId    string `json:"postId"`
-	UploadUrl string `json:"uploadUrl"`
+	PostId    string `json:"postId" binding:"required"`
+	UploadUrl string `json:"uploadUrl" binding:"required"`
 }
 
 func (s *Server) fetchCommunityPosts(c *gin.Context) {
@@ -63,10 +63,11 @@ func (s *Server) fetchCommunityPosts(c *gin.Context) {
 	}
 	var posts []*Post
 	for _, daily := range dlies {
+		// TODO: how can we handle placeholder?
 		// add image URL if it exists
 		imageUrl := ""
 		if daily.Picture != "" {
-			url, err := s.Storage.GenerateDownloadURL("bingdaily-pictures", daily.Picture)
+			url, err := s.Storage.GenerateDownloadURL(storage.POST_PICTURES, daily.Picture)
 			// error getting picture so send placeholder
 			// TODO: send local placeholder, not publicy-hosted
 			if err != nil {
@@ -126,7 +127,7 @@ func (s *Server) uploadPost(c *gin.Context) {
 	// TODO: s3 + sql operations can be done async?
 	// create picture
 	pictureId := storage.CreatePictureId()
-	uploadUrl, err := s.Storage.GenerateUploadURL("bingdaily-pictures", pictureId)
+	uploadUrl, err := s.Storage.GenerateUploadURL(storage.POST_PICTURES, pictureId)
 	// add to db
 	dailyId, err1 := dailies.CreateDaily(
 		s.DB,

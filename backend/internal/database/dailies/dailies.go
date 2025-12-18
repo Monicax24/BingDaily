@@ -36,6 +36,7 @@ func FetchDailiesFromCommunity(db *pgxpool.Pool, communityID string) ([]Daily, e
 	return dailies, nil
 }
 
+// TODO: should this check if daily already exists for that user
 // Create a new daily
 func CreateDaily(db *pgxpool.Pool, communityID string, pictureID, caption string, author string) (string, error) {
 	var postID string
