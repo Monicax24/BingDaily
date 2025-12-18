@@ -115,7 +115,7 @@ func HasPostedToday(db *pgxpool.Pool, userID, communityID string) (bool, error) 
 	var count int
 	err := db.QueryRow(context.TODO(), `
 		SELECT COUNT(*) FROM dailies 
-		WHERE author = $1 AND community_id = $2 AND DATE(time_posted) = CURRENT_DATE`,
+		WHERE author = $1 AND community_id = $2`,
 		userID, communityID).Scan(&count)
 	return count > 0, err
 }
