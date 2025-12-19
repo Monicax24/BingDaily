@@ -48,7 +48,11 @@ func (s *Server) registerUser(c *gin.Context) {
 
 	// check if valid email
 	validEmail, err := firebase.ValidEmail(s.AuthClient, userId, req.Email)
-	if err != nil || !validEmail {
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		sendResponse(c, false, "internal error", nil)
+		return
+	} else if !validEmail {
 		sendResponse(c, false, "invalid email address", nil)
 		return
 	}

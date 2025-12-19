@@ -146,6 +146,16 @@ To update a user's profile, send a request detailing which properties need to be
 }
 ```
 
+### Join Community
+`/communities/join/<communityId>` | `GET` | `authorization required`
+
+Backend will attempt to add the current user to specified community.
+
+### Leave Community
+`/communities/join/<communityId>` | `GET` | `authorization required`
+
+Backend will attempt to remove the current user to specified community.
+
 ### Get Community Posts
 `/communities/posts/<communityId>` | `GET` | `authorization required`
 
@@ -187,7 +197,7 @@ A user can only have 1 post per community. The database will check to see if the
 #### Response
 ```json
 "data": {
-    "postId": string, // newly created post id
-    "uploadUrl": string, // presigned PUT url
+    "postId": string, // newly created postId
+    "uploadUrl": string, // send PUT with media here
 }
 ```
