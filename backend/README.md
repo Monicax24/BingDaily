@@ -152,7 +152,7 @@ To update a user's profile, send a request detailing which properties need to be
 Backend will attempt to add the current user to specified community.
 
 ### Leave Community
-`/communities/join/<communityId>` | `GET` | `authorization required`
+`/communities/leave/<communityId>` | `GET` | `authorization required`
 
 Backend will attempt to remove the current user to specified community.
 

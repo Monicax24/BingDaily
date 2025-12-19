@@ -64,11 +64,14 @@ func UserInCommunity(db *pgxpool.Pool, communityId string, userId string) (bool,
 
 // Join a community
 func JoinCommunity(db *pgxpool.Pool, userID, communityID string) error {
-	_, err := db.Exec(context.TODO(), `
+	var modifiedId string
+
+	err := db.QueryRow(context.TODO(), `
 		UPDATE communities 
 		SET members = array_append(members, $1)
-		WHERE community_id = $2 AND NOT $1 = ANY(members)`,
-		userID, communityID)
+		WHERE community_id = $2 AND NOT $1 = ANY(members)
+		RETURNING community_id`,
+		userID, communityID).Scan(&modifiedId)
 
 	if err == nil {
 		// Also add community to user's communities array
@@ -84,11 +87,14 @@ func JoinCommunity(db *pgxpool.Pool, userID, communityID string) error {
 
 // Leave a community
 func LeaveCommunity(db *pgxpool.Pool, userID, communityID string) error {
-	_, err := db.Exec(context.TODO(), `
+	var modifiedId string
+
+	err := db.QueryRow(context.TODO(), `
 		UPDATE communities 
 		SET members = array_remove(members, $1)
-		WHERE community_id = $2`,
-		userID, communityID)
+		WHERE community_id = $2
+		RETURNING community_id`,
+		userID, communityID).Scan(&modifiedId)
 
 	if err == nil {
 		// Also remove community from user's communities array

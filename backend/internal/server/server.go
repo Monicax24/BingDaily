@@ -46,6 +46,8 @@ func RegisterRoutes(s *Server) {
 	// community routes
 	communityGroup := s.Router.Group("/communities")
 	communityGroup.GET("/:communityId", s.fetchCommunityData)
+	communityGroup.GET("/join/:communityId", s.joinCommunity)
+	communityGroup.GET("/leave/:communityId", s.leaveCommunity)
 
 	// post routes
 	postsGroup := s.Router.Group("/communities/posts")
@@ -67,22 +69,15 @@ func (s *Server) authenticateUser(c *gin.Context) {
 		c.Error(errors.New("authorization header missing"))
 		return
 	}
+
 	// check if valid format
 	if !strings.HasPrefix(authHeader, "Bearer ") {
 		c.Error(errors.New("invalid authentication header format"))
 		return
 	}
+
 	// decode token
 	token := strings.TrimPrefix(authHeader, "Bearer ")
-
-	// WARNING: remove this for production
-	// temp access token
-	if token == "X7f6sH9nAEU+9U6vzLNGK0EqzgFwALcOdNbpsHwplx3E04488E12QA=" {
-		c.Set("userId", "697b8a69-0c01-4ccb-aabc-6dccd6a22fa3")
-		return
-	}
-	// end test code
-
 	uid := firebase.DecodeToken(s.AuthClient, token)
 	if uid == "" {
 		c.Error(errors.New("invalid token"))

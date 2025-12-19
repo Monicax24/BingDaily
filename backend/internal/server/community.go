@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 type Community struct {
@@ -41,9 +42,40 @@ func (s *Server) fetchCommunityData(c *gin.Context) {
 		Prompt:      comm.Prompt,
 		MemberCnt:   len(comm.Members),
 	}
-
 	res := &FetchCommunityDataResponse{
 		Community: commResponse,
 	}
 	sendResponse(c, true, fmt.Sprintf("retreived %s", communityId), res)
+}
+
+func (s *Server) joinCommunity(c *gin.Context) {
+	userId := c.Value("userId").(string)
+	communityId := c.Param("communityId")
+
+	err := communities.JoinCommunity(s.DB, userId, communityId)
+	if err == pgx.ErrNoRows {
+		sendResponse(c, false, "already joined", nil)
+		return
+	} else if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+
+	sendResponse(c, true, fmt.Sprintf("joined %s", communityId), nil)
+}
+
+func (s *Server) leaveCommunity(c *gin.Context) {
+	userId := c.Value("userId").(string)
+	communityId := c.Param("communityId")
+
+	err := communities.LeaveCommunity(s.DB, userId, communityId)
+	if err == pgx.ErrNoRows {
+		sendResponse(c, false, "not in community", nil)
+		return
+	} else if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+
+	sendResponse(c, true, fmt.Sprintf("left %s", communityId), nil)
 }

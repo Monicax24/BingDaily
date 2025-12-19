@@ -3,7 +3,6 @@ package main
 import (
 	"bingdaily/backend/internal/database"
 	"bingdaily/backend/internal/database/communities"
-	"bingdaily/backend/internal/database/users"
 	"context"
 	"fmt"
 	"log"
@@ -103,17 +102,4 @@ func main() {
 		SET community_id = '6a6a671e-2543-4fad-ba82-dedc37338f14'
 		WHERE name = 'ACM Project Team 4'`,
 	)
-
-	// default user
-	userId := "697b8a69-0c01-4ccb-aabc-6dccd6a22fa3"
-	users.Register(
-		db,
-		userId,
-		"testuser",
-		"test@test.com",
-		"",
-	)
-
-	// add default user to default community
-	communities.JoinCommunity(db, userId, commId)
 }

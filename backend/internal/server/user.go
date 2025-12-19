@@ -101,7 +101,6 @@ func (s *Server) fetchUserProfile(c *gin.Context) {
 	dbuser, err := users.GetUser(s.DB, userId)
 
 	if err != nil {
-		fmt.Printf("(%s) Error: %v\n", userId, err)
 		sendResponse(c, false, "error fetching user", nil)
 		return
 	}
