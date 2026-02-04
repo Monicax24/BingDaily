@@ -13,12 +13,15 @@ type Community struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Prompt      string `json:"prompt"`
-
-	MemberCnt int `json:"memberCnt"`
+	MemberCnt   int    `json:"memberCnt"`
 }
 
 type FetchCommunityDataResponse struct {
 	Community *Community `json:"community"`
+}
+
+type FetchCommunitiesResponse struct {
+	Communities []*Community `json:"communities"`
 }
 
 func (s *Server) fetchCommunityData(c *gin.Context) {
@@ -80,5 +83,26 @@ func (s *Server) leaveCommunity(c *gin.Context) {
 }
 
 func (s *Server) fetchCommunities(c *gin.Context) {
+	db_comms, err := communities.ListCommunites(s.DB)
+	if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
 
+	var comms []*Community
+	for _, comm := range db_comms {
+		res := &Community{
+			CommunityId: comm.CommunityID,
+			Name:        comm.Name,
+			Description: comm.Description,
+			Prompt:      comm.Description,
+			MemberCnt:   comm.MemberCnt,
+		}
+		comms = append(comms, res)
+	}
+
+	res := &FetchCommunitiesResponse{
+		Communities: comms,
+	}
+	sendResponse(c, true, fmt.Sprintf("fetched %d communities", len(comms)), res)
 }

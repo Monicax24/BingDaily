@@ -10,13 +10,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// DEBUG: changed from community_id -> communityId... see if that breaks anything
 type Daily struct {
-	PostID      string    `json:"post_id" db:"post_id"`
-	CommunityID string    `json:"community_id" db:"community_id"`
+	PostID      string    `json:"posd" db:"post_id"`
+	CommunityID string    `json:"communityId" db:"community_id"`
 	Picture     string    `json:"picture"`
 	Caption     string    `json:"caption"`
 	Author      string    `json:"author"`
-	TimePosted  time.Time `json:"time_posted" db:"time_posted"`
+	TimePosted  time.Time `json:"timePosted" db:"time_posted"`
 	Likes       []string  `json:"likes"`
 }
 

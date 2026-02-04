@@ -123,6 +123,26 @@ def test_register_user(token: str, uid: str, email: str, username: str) -> Dict[
     print_test_result("POST /users/register", passed, j.get("message", ""))
     return {"passed": passed, "uid": uid, "email": email, "username": username}
 
+def test_fetch_communites(token: str) -> Dict[str, Any]:
+    r = requests.get(f"{BASE_URL}/communities/list", headers=hdrs(token), timeout=15)
+    j = get_json(r)
+    passed = req_ok(r)
+    comms = j.get("data", {})["communities"]
+    print_test_result("GET /communites/list", passed, j.get('message', ""))
+    if passed:
+        print(comms)
+        print()
+    return {"passed": passed}
+
+def test_delete_post(token: str, comm_id: str) -> Dict[str, Any]:
+    r = requests.get(
+        f"{BASE_URL}/communities/posts/delete/{comm_id}",
+        headers=hdrs(token), timeout=15
+    ) 
+    passed = req_ok(r)
+    j = get_json(r)
+    print_test_result("GET /communities/posts/delete/:communityId", passed, j.get('message', ""))
+    return {"passed": passed}
 
 def main() -> int:
     print(f"Base URL: {BASE_URL}")
@@ -168,6 +188,9 @@ def main() -> int:
 
     print(f"\n[*] Using auth token for all subsequent requests...\n")
 
+    # Step 3.1: Fetch communities list
+    results["fetch_communities"] = test_fetch_communites(auth_token)
+
     # Step 4: Fetch user profile
     results["profile"] = test_profile(auth_token)
 
@@ -205,6 +228,10 @@ def main() -> int:
     print("\nSummary:")
     print(json.dumps(results, indent=2))
 
+    input("\nPress ENTER to resume testing...\n")
+    # Step 10: Delete post 
+    results["delete_post"] = test_delete_post(auth_token, COMMUNITY_ID)
+
     # Non-zero exit if any core step failed
     core = ["firebase_create", "register", "get_token", "profile", "community", "posts_before", "create_post", "upload_media", "posts_after"]
     failed = [k for k in core if not results.get(k, False)]
@@ -212,7 +239,6 @@ def main() -> int:
         print(f"\nOne or more checks failed: {', '.join(failed)}")
         return 1
     return 0
-
 
 if __name__ == "__main__":
     try:

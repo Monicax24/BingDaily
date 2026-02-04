@@ -54,7 +54,7 @@ func RegisterRoutes(s *Server) {
 	postsGroup := s.Router.Group("/communities/posts")
 	postsGroup.GET("/:communityId", s.fetchCommunityPosts)
 	postsGroup.POST("/upload", s.uploadPost)
-	postsGroup.POST("/delete/:communityId", s.deletePost)
+	postsGroup.GET("/delete/:communityId", s.deletePost)
 
 	// user routes
 	userGroup := s.Router.Group("/users")

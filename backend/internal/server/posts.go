@@ -155,6 +155,7 @@ func (s *Server) deletePost(c *gin.Context) {
 
 	if err != nil {
 		sendResponse(c, false, "internal error", nil)
+		return
 	}
 
 	sendResponse(c, true, "successfully deleted post", nil)

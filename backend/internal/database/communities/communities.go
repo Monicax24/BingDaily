@@ -3,16 +3,26 @@ package communities
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type CoreCommunityData struct {
+	CommunityID string `json:"communityId" db:"community_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Prompt      string `json:"prompt"`
+	MemberCnt   int    `json:"memberCnt" db:"member_cnt"`
+}
+
+// DEBUG: changed from community_id -> communityId... see if that breaks anything
 type Community struct {
-	CommunityID string   `json:"community_id"`
+	CommunityID string   `json:"communityId"`
 	Picture     string   `json:"picture"`
 	Description string   `json:"description"`
-	Members     []string `json:"members"`   // Array of user IDs
-	Posts       []string `json:"posts"`     // Array of post IDs
-	PostTime    string   `json:"post_time"` // Default time for daily posts (e.g., "09:00")
+	Members     []string `json:"members"`  // Array of user IDs
+	Posts       []string `json:"posts"`    // Array of post IDs
+	PostTime    string   `json:"postTime"` // Default time for daily posts (e.g., "09:00")
 	Prompt      string   `json:"prompt"`
 	Name        string   `json:"name"`
 }
@@ -109,7 +119,22 @@ func LeaveCommunity(db *pgxpool.Pool, userID, communityID string) error {
 
 // TODO: add some sort of serialization... might be too much data
 // List all current community ids
-// func ListCommunites(db *pgxpool.Pool) error {
-
-// 	// err := db.Query()
-// }
+func ListCommunites(db *pgxpool.Pool) ([]CoreCommunityData, error) {
+	rows, err := db.Query(context.TODO(), `
+		SELECT 
+			community_id, 
+			name, 
+			description, 
+			prompt,
+			CARDINALITY(members) AS member_cnt
+		FROM communities
+	`)
+	if err != nil {
+		return nil, err
+	}
+	communities, err := pgx.CollectRows(rows, pgx.RowToStructByName[CoreCommunityData])
+	if err != nil {
+		return nil, err
+	}
+	return communities, nil
+}
