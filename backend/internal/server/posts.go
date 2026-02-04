@@ -147,3 +147,15 @@ func (s *Server) uploadPost(c *gin.Context) {
 	}
 	sendResponse(c, true, "post uploaded", res)
 }
+
+func (s *Server) deletePost(c *gin.Context) {
+	userId := c.Value("userId").(string)
+	communityId := c.Param("communityId")
+	err := dailies.DeleteDailyByUser(s.DB, userId, communityId)
+
+	if err != nil {
+		sendResponse(c, false, "internal error", nil)
+	}
+
+	sendResponse(c, true, "successfully deleted post", nil)
+}

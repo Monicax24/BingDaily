@@ -125,16 +125,17 @@ To update a user's profile, send a request detailing which properties need to be
 
 ## Community
 
-### Retrieve Core Community Data
+### List Communites
 
-`/communities/<communityId>` | `GET` | `authorization required`
+`/communities/list` | `GET` | `authorization required`
 
 #### Response
 ```json
 "data": {
-    "community": CommunityObject*,
+    "communities": CommunityObject[]*
 }
 ```
+
 \* `CommunityObject` will follow this format:
 ```json
 {
@@ -143,6 +144,18 @@ To update a user's profile, send a request detailing which properties need to be
     "description": string,
     "prompt": string,
     "memberCnt": int
+}
+```
+
+
+### Retrieve Core Community Data
+
+`/communities/<communityId>` | `GET` | `authorization required`
+
+#### Response
+```json
+"data": {
+    "community": CommunityObject,
 }
 ```
 
@@ -201,3 +214,9 @@ A user can only have 1 post per community. The database will check to see if the
     "uploadUrl": string, // send PUT with media here
 }
 ```
+
+### Delete Post from Community
+
+`/communities/posts/delete/<communityId>` | `POST` | `authorization required`
+
+Will delete the user's post in the specified community if it exists.

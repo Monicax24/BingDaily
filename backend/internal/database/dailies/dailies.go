@@ -120,6 +120,28 @@ func HasPostedToday(db *pgxpool.Pool, userID, communityID string) (bool, error) 
 	return count > 0, err
 }
 
+// TODO: no confirmation of deletion
+func DeleteDailyByUser(db *pgxpool.Pool, userId, communityId string) error {
+	// delete from daily db
+	var postId string
+	err := db.QueryRow(context.TODO(), `
+		DELETE FROM dailies
+		WHERE user_id = $1
+		AND community_id = $2
+		RETURNING post_id`,
+		userId, communityId).Scan(&postId)
+	if err != nil {
+		return err
+	}
+	// remove from community posts
+	_, err = db.Exec(context.TODO(), `
+		UPDATE communities
+		SET posts = array_remove(posts, $1)
+		WHERE community_id = $2`,
+		postId, communityId)
+	return err
+}
+
 func DeleteDaily(db *pgxpool.Pool, postID string) error {
 	tx, err := db.Begin(context.TODO())
 	if err != nil {

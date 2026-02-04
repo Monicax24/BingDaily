@@ -48,11 +48,13 @@ func RegisterRoutes(s *Server) {
 	communityGroup.GET("/:communityId", s.fetchCommunityData)
 	communityGroup.GET("/join/:communityId", s.joinCommunity)
 	communityGroup.GET("/leave/:communityId", s.leaveCommunity)
+	communityGroup.GET("/list", s.fetchCommunities)
 
 	// post routes
 	postsGroup := s.Router.Group("/communities/posts")
 	postsGroup.GET("/:communityId", s.fetchCommunityPosts)
 	postsGroup.POST("/upload", s.uploadPost)
+	postsGroup.POST("/delete/:communityId", s.deletePost)
 
 	// user routes
 	userGroup := s.Router.Group("/users")

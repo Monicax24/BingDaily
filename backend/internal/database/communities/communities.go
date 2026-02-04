@@ -58,7 +58,6 @@ func UserInCommunity(db *pgxpool.Pool, communityId string, userId string) (bool,
 	if err == nil {
 		return in, nil
 	}
-
 	return false, err
 }
 
@@ -107,3 +106,10 @@ func LeaveCommunity(db *pgxpool.Pool, userID, communityID string) error {
 
 	return err
 }
+
+// TODO: add some sort of serialization... might be too much data
+// List all current community ids
+// func ListCommunites(db *pgxpool.Pool) error {
+
+// 	// err := db.Query()
+// }

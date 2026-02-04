@@ -45,7 +45,7 @@ func (s *Server) fetchCommunityData(c *gin.Context) {
 	res := &FetchCommunityDataResponse{
 		Community: commResponse,
 	}
-	sendResponse(c, true, fmt.Sprintf("retreived %s", communityId), res)
+	sendResponse(c, true, fmt.Sprintf("retrieved %s", communityId), res)
 }
 
 func (s *Server) joinCommunity(c *gin.Context) {
@@ -76,6 +76,9 @@ func (s *Server) leaveCommunity(c *gin.Context) {
 		sendResponse(c, false, "internal error", nil)
 		return
 	}
-
 	sendResponse(c, true, fmt.Sprintf("left %s", communityId), nil)
+}
+
+func (s *Server) fetchCommunities(c *gin.Context) {
+
 }
