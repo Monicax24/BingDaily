@@ -127,7 +127,7 @@ func DeleteDailyByUser(db *pgxpool.Pool, userId, communityId string) error {
 	var postId string
 	err := db.QueryRow(context.TODO(), `
 		DELETE FROM dailies
-		WHERE user_id = $1
+		WHERE author = $1
 		AND community_id = $2
 		RETURNING post_id`,
 		userId, communityId).Scan(&postId)
