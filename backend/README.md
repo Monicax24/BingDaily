@@ -122,6 +122,30 @@ To update a user's profile, send a request detailing which properties need to be
 
 \*\* `communities` will be an array of `communityId` strings.
 
+### List User Posts
+
+`/users/posts` | `GET` | `authorization required`
+
+Retrieve a list the user's active posts.
+
+#### Response
+```json
+"data": {
+    "posts": PostObject[]*
+}
+```
+
+\* `PostObject` will follow this format:
+```json
+{
+    "postId": string,
+    "communityId": string,
+    "userId": string,
+    "caption": string,
+    "timePosted": string, // follows YYYY-DD-MMTHH:MM:SS (ISO 8601)
+    "imageUrl": string*,
+}
+```
 
 ## Community
 

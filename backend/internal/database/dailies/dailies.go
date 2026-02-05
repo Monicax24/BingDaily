@@ -37,6 +37,22 @@ func FetchDailiesFromCommunity(db *pgxpool.Pool, communityID string) ([]Daily, e
 	return dailies, nil
 }
 
+// Fetch all dailies from certain user
+func FetchDailiesFromUser(db *pgxpool.Pool, userId string) ([]Daily, error) {
+	rows, err := db.Query(
+		context.TODO(),
+		`SELECT * FROM dailies WHERE author = $1`,
+		userId)
+	if err != nil {
+		return nil, err
+	}
+	dailies, err := pgx.CollectRows(rows, pgx.RowToStructByName[Daily])
+	if err != nil {
+		return nil, err
+	}
+	return dailies, nil
+}
+
 // TODO: should this check if daily already exists for that user
 // Create a new daily
 func CreateDaily(db *pgxpool.Pool, communityID string, pictureID, caption string, author string) (string, error) {

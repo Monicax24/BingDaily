@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bingdaily/backend/internal/database/dailies"
 	"bingdaily/backend/internal/database/users"
 	"bingdaily/backend/internal/firebase"
 	"bingdaily/backend/internal/storage"
@@ -97,14 +98,11 @@ func (s *Server) updateUserProfile(c *gin.Context) {
 
 func (s *Server) fetchUserProfile(c *gin.Context) {
 	userId := c.Value("userId").(string)
-
 	dbuser, err := users.GetUser(s.DB, userId)
-
 	if err != nil {
 		sendResponse(c, false, "error fetching user", nil)
 		return
 	}
-
 	user := &User{
 		UserId:      dbuser.UserID,
 		Email:       dbuser.Email,
@@ -112,7 +110,6 @@ func (s *Server) fetchUserProfile(c *gin.Context) {
 		JoinDate:    dbuser.JoinedDate,
 		Communities: dbuser.Communities,
 	}
-
 	// TODO: maybe this can go in helper
 	// process photo
 	if dbuser.ProfilePicture != "" {
@@ -129,13 +126,49 @@ func (s *Server) fetchUserProfile(c *gin.Context) {
 	} else {
 		user.ProfilePicture = "https://wallpapers.com/images/hd/default-profile-picture-placeholder-kal8zbcust2luxh3.jpg"
 	}
-
 	res := &FetchUserProfileResponse{User: user}
-
 	sendResponse(
 		c,
 		true,
 		fmt.Sprintf("retrieved %s", userId),
 		res,
 	)
+}
+
+func (s *Server) fetchUserPosts(c *gin.Context) {
+	userId := c.Value("userId").(string)
+	dlies, err := dailies.FetchDailiesFromUser(s.DB, userId)
+	if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+	var posts []*Post
+	for _, daily := range dlies {
+		// TODO: how can we handle placeholder?
+		// add image URL if it exists
+		imageUrl := ""
+		if daily.Picture != "" {
+			url, err := s.Storage.GenerateDownloadURL(storage.POST_PICTURES, daily.Picture)
+			// error getting picture so send placeholder
+			// TODO: send local placeholder, not publicy-hosted
+			if err != nil {
+				imageUrl = "https://www.setra.com/hubfs/Sajni/crc_error.jpg"
+			} else {
+				imageUrl = url
+			}
+		}
+		res := &Post{
+			PostId:      daily.PostID,
+			CommunityId: daily.CommunityID,
+			UserId:      daily.Author,
+			Caption:     daily.Caption,
+			TimePosted:  daily.TimePosted,
+			ImageUrl:    imageUrl,
+		}
+		posts = append(posts, res)
+	}
+	res := &FetchCommunityPostsResponse{
+		Posts: posts,
+	}
+	sendResponse(c, true, fmt.Sprintf("fetched %d posts", len(posts)), res)
 }

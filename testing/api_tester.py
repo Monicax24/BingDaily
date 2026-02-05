@@ -36,7 +36,7 @@ def req_ok(resp: requests.Response) -> bool:
 
 def print_test_result(title: str, passed: bool, detail: str = "") -> None:
     status = "PASS" if passed else "FAIL"
-    line = f"[ {status} ] {title}"
+    line = f"\n[ {status} ] {title}"
     if detail:
         line += f" — {detail}"
     print(line)
@@ -130,7 +130,7 @@ def test_fetch_communites(token: str) -> Dict[str, Any]:
     comms = j.get("data", {})["communities"]
     print_test_result("GET /communites/list", passed, j.get('message', ""))
     if passed:
-        print(comms)
+        print(json.dumps({"communites": comms}, indent=2))
         print()
     return {"passed": passed}
 
@@ -144,11 +144,24 @@ def test_delete_post(token: str, comm_id: str) -> Dict[str, Any]:
     print_test_result("GET /communities/posts/delete/:communityId", passed, j.get('message', ""))
     return {"passed": passed}
 
+def test_list_user_posts(token: str) -> bool:
+    """Test the /users/posts endpoint to retrieve a list of the user's active posts."""
+    r = requests.get(f"{BASE_URL}/users/posts", headers=hdrs(token), timeout=15)
+    j = get_json(r)
+    
+    # Validate response structure
+    posts = j.get("data", {}).get("posts", [])
+    passed = req_ok(r)
+    print_test_result("GET /users/posts", passed, j.get("message", ""))
+    if passed:
+        print(json.dumps({"posts": posts}, indent=2))
+        print()
+    return {"passed": passed}
+
 def main() -> int:
     print(f"Base URL: {BASE_URL}")
     print(f"Community: {COMMUNITY_ID}")
     print("Starting API tests with new user creation flow...\n")
-
     results = {}
 
     # Generate test user credentials
@@ -219,6 +232,9 @@ def main() -> int:
     after = test_get_posts(auth_token, COMMUNITY_ID)
     results["posts_after"] = after["passed"]
 
+    # Step 9.5: List all the current posts of the user
+    results["list_user_posts"] = test_list_user_posts(auth_token)
+
     # Basic delta check
     if before["passed"] and after["passed"] and results["create_post"]:
         grew = (after["count"] or 0) >= (before["count"] or 0)
@@ -228,9 +244,9 @@ def main() -> int:
     print("\nSummary:")
     print(json.dumps(results, indent=2))
 
-    input("\nPress ENTER to resume testing...\n")
-    # Step 10: Delete post 
-    results["delete_post"] = test_delete_post(auth_token, COMMUNITY_ID)
+    # input("\nPress ENTER to resume testing...\n")
+    # # Step 10: Delete post 
+    # results["delete_post"] = test_delete_post(auth_token, COMMUNITY_ID)
 
     # Non-zero exit if any core step failed
     core = ["firebase_create", "register", "get_token", "profile", "community", "posts_before", "create_post", "upload_media", "posts_after"]

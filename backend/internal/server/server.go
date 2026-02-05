@@ -61,6 +61,7 @@ func RegisterRoutes(s *Server) {
 	userGroup.POST("/register", s.registerUser)
 	userGroup.POST("/update", s.updateUserProfile)
 	userGroup.GET("/profile", s.fetchUserProfile)
+	userGroup.GET("/posts", s.fetchUserPosts)
 }
 
 // Authentication middleware
