@@ -18,7 +18,7 @@ type Daily struct {
 	Caption     string    `json:"caption"`
 	Author      string    `json:"author"`
 	TimePosted  time.Time `json:"timePosted" db:"time_posted"`
-	Likes       []string  `json:"likes"`
+	Likes       []string  `json:"likes" db:"likes"`
 }
 
 // Fetch all dailies from certain community

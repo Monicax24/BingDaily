@@ -144,6 +144,7 @@ Retrieve a list the user's active posts.
     "caption": string,
     "timePosted": string, // follows YYYY-DD-MMTHH:MM:SS (ISO 8601)
     "imageUrl": string*,
+    "likeCount": int,
 }
 ```
 
@@ -214,6 +215,7 @@ This endpoint is to retrieve all the posts from a community. This request will o
     "caption": string,
     "timePosted": string, // follows YYYY-DD-MMTHH:MM:SS (ISO 8601)
     "imageUrl": string*,
+    "likeCount": int,
 }
 ```
 \* `imageUrl` is a signed URL that can be used to download/access media
@@ -244,3 +246,12 @@ A user can only have 1 post per community. The database will check to see if the
 `/communities/posts/delete/<communityId>` | `POST` | `authorization required`
 
 Will delete the user's post in the specified community if it exists.
+
+
+### Like Post
+
+`/communities/posts/like/<postId>` | `POST` | `authorization required`
+
+### Unlike Post
+
+`/communities/posts/unlike/<postId>` | `POST` | `authorization required`

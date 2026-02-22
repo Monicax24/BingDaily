@@ -99,6 +99,7 @@ def test_get_posts(token: str, community_id: str) -> Dict[str, Any]:
         print("POST IMAGES:")
         for i in range(count):
             print(f"URL {i}: {posts[i]["imageUrl"]}\n")
+            print(f"LIKE COUNT: {posts[i]["likeCount"]}\n")
         print("\n\n")
     return {"passed": passed, "count": count}
 
@@ -112,7 +113,7 @@ def test_create_post(token: str, community_id: str) -> Dict[str, Any]:
     upload_url = data.get("uploadUrl")
     passed = req_ok(r) and isinstance(post_id, str) and isinstance(upload_url, str)
     print_test_result("POST /communities/posts/upload", passed, j.get("message", ""))
-    return {"passed": passed, "postId": post_id, "uploadUrl": upload_url}
+    return ({"passed": passed, "postId": post_id, "uploadUrl": upload_url}, post_id,)
 
 
 def test_register_user(token: str, uid: str, email: str, username: str) -> Dict[str, Any]:
@@ -157,6 +158,27 @@ def test_list_user_posts(token: str) -> bool:
         print(json.dumps({"posts": posts}, indent=2))
         print()
     return {"passed": passed}
+
+def test_like_post(token: str, post_id: str) -> Dict[str, Any]:
+    r = requests.get(
+        f"{BASE_URL}/communities/posts/like/{post_id}",
+        headers=hdrs(token), timeout=15
+    )
+    passed = req_ok(r)
+    j = get_json(r)
+    print_test_result("GET /communities/posts/like/:postId", passed, j.get('message', ""))
+    return {"passed": passed}
+
+def test_unlike_post(token: str, post_id: str) -> Dict[str, Any]:
+    r = requests.get(
+        f"{BASE_URL}/communities/posts/unlike/{post_id}",
+        headers=hdrs(token), timeout=15
+    )
+    passed = req_ok(r)
+    j = get_json(r)
+    print_test_result("GET /communities/posts/like/:postId", passed, j.get('message', ""))
+    return {"passed": passed}
+
 
 def main() -> int:
     print(f"Base URL: {BASE_URL}")
@@ -218,8 +240,11 @@ def main() -> int:
     results["posts_before"] = before["passed"]
 
     # Step 7: Create a post
-    created = test_create_post(auth_token, COMMUNITY_ID)
+    created, post_id = test_create_post(auth_token, COMMUNITY_ID)
     results["create_post"] = created["passed"]
+
+    # Step 7.5: Like post
+    results["like_post"] = test_like_post(auth_token, post_id)
 
     # Step 8: Upload media to S3
     if created["passed"]:
@@ -244,9 +269,19 @@ def main() -> int:
     print("\nSummary:")
     print(json.dumps(results, indent=2))
 
+
+
+    # PAUSING INTERVAL TESTS
     # input("\nPress ENTER to resume testing...\n")
+    
     # # Step 10: Delete post 
     # results["delete_post"] = test_delete_post(auth_token, COMMUNITY_ID)
+    
+    # Step 10.1: Unlike post
+    # results["unlike_post"] = test_unlike_post(auth_token, post_id)
+
+
+
 
     # Non-zero exit if any core step failed
     core = ["firebase_create", "register", "get_token", "profile", "community", "posts_before", "create_post", "upload_media", "posts_after"]

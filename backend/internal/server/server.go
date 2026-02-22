@@ -55,6 +55,8 @@ func RegisterRoutes(s *Server) {
 	postsGroup.GET("/:communityId", s.fetchCommunityPosts)
 	postsGroup.POST("/upload", s.uploadPost)
 	postsGroup.GET("/delete/:communityId", s.deletePost)
+	postsGroup.GET("/like/:postId", s.likePost)
+	postsGroup.GET("/unlike/:postId", s.unlikePost)
 
 	// user routes
 	userGroup := s.Router.Group("/users")

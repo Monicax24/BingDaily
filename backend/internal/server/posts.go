@@ -19,6 +19,7 @@ type Post struct {
 	Caption     string    `json:"caption"`
 	ImageUrl    string    `json:"imageUrl"`
 	TimePosted  time.Time `json:"timePosted"`
+	LikeCount   int32     `json:"likeCount"`
 }
 
 type FetchCommunityPostsResponse struct {
@@ -83,8 +84,10 @@ func (s *Server) fetchCommunityPosts(c *gin.Context) {
 			Caption:     daily.Caption,
 			TimePosted:  daily.TimePosted,
 			ImageUrl:    imageUrl,
+			LikeCount:   int32(len(daily.Likes)),
 		}
 		posts = append(posts, res)
+
 	}
 	res := &FetchCommunityPostsResponse{
 		Posts: posts,
@@ -152,11 +155,32 @@ func (s *Server) deletePost(c *gin.Context) {
 	userId := c.Value("userId").(string)
 	communityId := c.Param("communityId")
 	err := dailies.DeleteDailyByUser(s.DB, userId, communityId)
-
 	if err != nil {
 		sendResponse(c, false, "internal error", nil)
 		return
 	}
 
 	sendResponse(c, true, "successfully deleted post", nil)
+}
+
+func (s *Server) likePost(c *gin.Context) {
+	userId := c.Value("userId").(string)
+	postId := c.Param("postId")
+	err := dailies.LikeDaily(s.DB, postId, userId)
+	if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+	sendResponse(c, true, "liked post", nil)
+}
+
+func (s *Server) unlikePost(c *gin.Context) {
+	userId := c.Value("userId").(string)
+	postId := c.Param("postId")
+	err := dailies.UnlikeDaily(s.DB, postId, userId)
+	if err != nil {
+		sendResponse(c, false, "internal error", nil)
+		return
+	}
+	sendResponse(c, true, "unliked post", nil)
 }
